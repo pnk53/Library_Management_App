@@ -1,20 +1,20 @@
 <template >
-  <img alt="Vue logo" src="./assets/logo.png">
+  <HeaderNav />
   <router-view />
+  <FooterNav />
 </template>
 
 <script>
-
+import HeaderNav from './components/includes/HeaderNav.vue';
+import FooterNav from './components/includes/FooterNav.vue';
 export default {
   name: 'App',
+  components: {
+    HeaderNav,
+    FooterNav
+  }
 }
 </script> 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  margin-top: 60px;
-}
+
 </style>
