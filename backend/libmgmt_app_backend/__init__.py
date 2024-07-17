@@ -17,7 +17,19 @@ def create_flask_app(configuration=LocalConfig):
     )
     
     #Register blueprints here
+    from libmgmt_app_backend.main import bpMain
+    flask_app.register_blueprint(bpMain)
     
+    #Add your resources here
+    from libmgmt_app_backend.resources.userResource import UserResource
+    from libmgmt_app_backend.resources.bookResource import BookResource
+    from libmgmt_app_backend.resources.sectionResource import SectionResource
+    from libmgmt_app_backend.resources.issuedBookResource import IssuedBookResource
+    
+    api.add_resource(UserResource, "/user", "/user/<int:user_id>")
+    api.add_resource(BookResource, "/book", "/book/<int:book_id>")
+    api.add_resource(SectionResource, "/section", "/section/<int:section_id>")
+    api.add_resource(IssuedBookResource, "/issuedBook", "/issuedBook/<int:issuedBook_id>")
     
     api.init_app(flask_app)
     
