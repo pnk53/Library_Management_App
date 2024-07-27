@@ -53,32 +53,26 @@
           <img src="../assets/logo.png" alt="LOGO" class="img-thumbnail rounded" width="350px" height="350px" />
         </div>
         <div class="col-md-6 offset-md-2 col-lg-6 offset-lg-2 col-sm-10">
-          <form @submit.prevent="login" class="form" ref="loginForm">
+          <form @submit.prevent="onLogin" class="form" ref="loginForm">
             <div class="mb-3">
               <label for="username" class="form-label text-warning">Username</label>
-              <input type="text" id="username" class="form-control" name="username" placeholder="bookworm123"
-                v-model="state.username" :class="{
-                  'is-invalid': v$.username.$error,
-                  'is-valid': !v$.username.$invalid,
-                }" />
-              <div class="invalid-feedback" v-if="v$.username.$error">
-                {{ v$.username.$errors[0].$message }}
+              <input type="text" id="username" class="form-control" name="username" placeholder="alexM12"
+                v-model="state.username"
+                :class="{ 'is-invalid': vLogin.username.$error, 'is-valid': !vLogin.username.$invalid }">
+              <div class="invalid-feedback" v-if="vLogin.username.$error">
+                {{ vLogin.username.$errors[0].$message }}
               </div>
             </div>
             <div class="mb-3">
               <label for="password" class="form-label text-warning">Password</label>
-              <input type="password" name="password" id="password" class="form-control" v-model="state.password" :class="{
-                'is-invalid': v$.password.$error,
-                'is-valid': !v$.password.$invalid,
-              }" />
-              <div class="invalid-feedback" v-if="v$.password.$error">
-                {{ v$.password.$errors[0].$message }}
+              <input type="password" id="password" class="form-control" name="password" v-model="state.password"
+                :class="{ 'is-invalid': vLogin.password.$error, 'is-valid': !vLogin.password.$invalid }">
+              <div class="invalid-feedback" v-if="vLogin.password.$error">
+                {{ vLogin.password.$errors[0].$message }}
               </div>
             </div>
             <div class="d-grid gap-2 mt-4">
-              <button class="btn btn-outline-warning" type="submit" :disabled="v$.$invalid">
-                Login
-              </button>
+              <button class="btn btn-outline-warning" type="submit" :disabled="vLogin.$invalid">Login</button>
             </div>
           </form>
           <p class="text-secondary mt-5">
@@ -86,8 +80,11 @@
             <router-link to="/signUp" class="text-warning text-decoration-none">SignUp</router-link>
           </p>
           <p class="text-secondary">
-            Forgot Passowrd ?
-            <ForgotPassword />
+            Forgot Password ?
+            <a class="text-decoration-none text-warning myLink" @click="loadComponent" >Reset</a>
+            <component :is="passwordModal" v-if="isModalLoaded"></component>
+            <!-- Forgot Passowrd ?
+            <ForgotPassword /> -->
           </p>
         </div>
       </div>
@@ -95,48 +92,63 @@
   </div>
 </template>
 
-<script>
-import { computed, reactive, ref } from "vue";
-import { required, alpha, minLength } from "@vuelidate/validators";
+<script setup>
+import { computed, defineAsyncComponent, reactive, ref } from "vue";
+import { required, alphaNum, minLength } from "@vuelidate/validators";
 import useVuelidate from "@vuelidate/core";
-import ForgotPassword from "../components/ForgotPassword.vue";
+import { useRouter } from "vue-router";
+import { useAlertStore } from "@/stores/alertStore";
+import { useUserStore } from "@/stores/userStore";
 
-export default {
-  name: "LoginPage",
-  components: {
-    ForgotPassword,
-  },
-  setup() {
-    const state = reactive({
-      username: ref(null),
-      password: ref(null),
-    });
-    const rules = computed(() => {
-      return {
-        username: { required, alpha },
-        password: { required, minLength: minLength(6) },
-      };
-    });
-    const v$ = useVuelidate(rules, state, {
-      $autoDirty: true,
-    });
+const router = useRouter();
+const isModalLoaded = ref(false);
+const passwordModal = ref(null);
 
-    return {
-      state,
-      v$,
-    };
-  },
-  methods: {
-    login() {
-      this.v$.$validate();
-      if (!this.v$.$error) {
-        this.$refs.loginForm.reset();
-      } else {
-        alert("Failed");
-      }
-    },
-  },
-};
+function loadComponent(){
+  isModalLoaded.value = true;
+  passwordModal.value = defineAsyncComponent(()=> import('../components/ForgotPassword.vue'));
+}
+
+const state = reactive({
+  username: ref(null),
+  password: ref(null),
+})
+
+const rules = computed(() => {
+  return {
+    username: { required, alphaNum },
+    password: { required, minLength: minLength(6) }
+  }
+})
+
+const vLogin = useVuelidate(rules, state, {
+  $autoDirty: true,
+})
+
+const onLogin = async () => {
+  const alertStore = useAlertStore();
+  const userStore = useUserStore();
+  try {
+    await userStore.userLogin(state);
+    console.log(userStore.user);
+    if(userStore.user.userType == "Librarian"){
+      router.push('/librarianHome');
+    }
+    else{
+      router.push('/userHome');
+    }
+    setTimeout(() => {
+    alertStore.success("Login Successful");
+    },300);
+  }
+  catch (error) {
+    console.log(userStore.errorMessage);
+    let message = "Login failed: " + userStore.errorMessage;
+    alertStore.error(message);
+  }
+}
+
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -151,6 +163,10 @@ export default {
 ::-ms-input-placeholder {
   /* Edge 12 -18 */
   color: #dbe975;
+}
+
+.myLink{
+  cursor: pointer;
 }
 
 .myCarousel {

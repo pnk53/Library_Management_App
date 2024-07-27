@@ -10,7 +10,7 @@
                     <img src="../assets/logo.png" alt="LOGO" class="img-thumbnail rounded" width="350px" height="350px">
                 </div>
                 <div class="col-md-6 offset-md-2 col-lg-6 offset-lg-2 col-sm-12">
-                    <form @submit.prevent="signUp" class="form" ref="signUpForm" >
+                    <form @submit.prevent="onSignUp" class="form" ref="signUpForm">
                         <div class="mb-3">
                             <label for="firstName" class="form-label text-warning">First Name</label>
                             <input type="text" id="firstName" class="form-control" name="firstname" placeholder="Alex"
@@ -66,9 +66,12 @@
                             </div>
                         </div>
                         <div class="d-grid gap-2 mt-4">
-                            <button class="btn btn-outline-danger" type="submit" :disabled="v$.$invalid">SignUp</button>
+                            <button class="btn btn-outline-success" type="submit" :disabled="v$.$invalid">SignUp</button>
                         </div>
                     </form>
+                    <div class="d-grid gap-2 mt-4">
+                            <button class="btn btn-outline-info" type="reset" @click="clearForm">Reset</button>
+                        </div>
                     <p class="text-secondary mt-5 fs-5">Back to <router-link to="/"
                             class="text-warning text-decoration-none">Login</router-link> </p>
                 </div>
@@ -77,58 +80,70 @@
     </div>
 </template>
 
-<script>
+<script setup>
+import { useAlertStore } from '@/stores/alertStore';
+import { useUserStore } from '@/stores/userStore';
 import useVuelidate from '@vuelidate/core';
 import { required, email, alpha, alphaNum, minLength, sameAs } from '@vuelidate/validators';
 import { computed, reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-export default {
-    name: 'SignUpPage',
-    setup() {
-        const state = reactive({
-            firstName: ref(null),
-            lastName: ref(null),
-            username: ref(null),
-            email: ref(null),
-            password: {
-                password: ref(null),
-                confirm: ref(null),
-            },
-        })
-        const rules = computed(() => {
-            return {
-                firstName: { required, alpha },
-                lastName: { required, alpha },
-                username: { required, alphaNum },
-                email: { required, email },
-                password: {
-                    password: { required, minLenght: minLength(6) },
-                    confirm: { required, sameAs: sameAs(state.password.password) },
-                },
-            }
-        })
-        const v$ = useVuelidate(rules, state, {
-            $autoDirty: true,
-        })
+const router = useRouter();
 
-        return {
-            state,
-            v$,
-        }
+const state = reactive({
+    firstName: ref(null),
+    lastName: ref(null),
+    username: ref(null),
+    email: ref(null),
+    password: {
+        password: ref(null),
+        confirm: ref(null),
     },
-    methods: {
-        signUp() {
-            this.v$.$validate();
-            if (!this.v$.$error) {
-                this.$refs.signUpForm.reset();
-                alert('Successful');
-            }
-            else {
-                alert('Failed')
-            }
-        }
+})
+const rules = computed(() => {
+    return {
+        firstName: { required, alpha },
+        lastName: { required, alpha },
+        username: { required, alphaNum },
+        email: { required, email },
+        password: {
+            password: { required, minLenght: minLength(6) },
+            confirm: { required, sameAs: sameAs(state.password.password) },
+        },
     }
-};
+})
+const v$ = useVuelidate(rules, state, {
+    $autoDirty: true,
+})
+
+const clearForm = () => {
+    state.firstName = ref(null),
+    state.lastName = ref(null),
+    state.username = ref(null),
+    state.email = ref(null),
+    state.password.password = ref(null),
+    state.password.confirm = ref(null)
+}
+
+const onSignUp = async () => {
+    const alertStore = useAlertStore();
+    const userStore = useUserStore();
+    try{
+        await userStore.userRegistration(state);
+        console.log(userStore.user);
+        alertStore.success("User registered successfully");
+        clearForm();
+        setTimeout(()=>{
+            router.push('/');
+        }, 2500);
+    }
+    catch(error){
+        console.log(userStore.errorMessage);
+        let message = "Registration failed: " + userStore.errorMessage;
+        alertStore.error(message);
+    }
+}
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

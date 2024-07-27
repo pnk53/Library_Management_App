@@ -21,6 +21,16 @@ const routes = [
         name: 'SignUpPage',
         component: () => import("../components/SignUpPage.vue"),
         path: '/signUp'
+    },
+    {
+        name: 'AdminHome',
+        component: () => import("../components/AdminHome.vue"),
+        path: '/librarianHome'
+    },
+    {
+        name: 'UserHome',
+        component: () => import("../components/UserHome.vue"),
+        path: '/userHome'
     }
 ];
 

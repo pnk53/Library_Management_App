@@ -92,6 +92,7 @@ def userLogin():
                 "jwt": jwt,
                 "name": username,
                 "user_id": currentUser.id,
+                "userType": currentUser.userType,
                 "exp": (datetime.utcnow() + timedelta(minutes=2)).strftime('%Y-%m-%d %H:%M:%S'),
             }
         ), 201

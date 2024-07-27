@@ -1,5 +1,4 @@
 <template>
-    <a class="text-warning text-decoration-none myLink" @click="isModalOpen = true">Reset password</a>
     <div class="myModal-bg" v-if="isModalOpen">
         <div class="myModal" ref="modal">
             <button class="btn-primary btn-close d-block ms-auto p-3" @click="isModalOpen = false"></button>
@@ -9,16 +8,16 @@
                     <div class="mb-3">
                         <label for="email" class="form-label text-warning">Enter your email: </label>
                         <input type="email" id="email" class="form-control" name="email" placeholder="asd@gmail.com"
-                            v-model="state.email" :class="{
-                                'is-invalid': v$.email.$error,
-                                'is-valid': !v$.email.$invalid,
+                            v-model="forgotState.email" :class="{
+                                'is-invalid': vForgot.email.$error,
+                                'is-valid': !vForgot.email.$invalid,
                             }" />
-                        <div class="invalid-feedback" v-if="v$.email.$error">
-                            {{ v$.email.$errors[0].$message }}
+                        <div class="invalid-feedback" v-if="vForgot.email.$error">
+                            {{ vForgot.email.$errors[0].$message }}
                         </div>
                     </div>
                     <div class="d-grid gap-2 mt-4">
-                        <button class="btn btn-outline-success" type="submit" :disabled="v$.$invalid">
+                        <button class="btn btn-outline-success" type="submit" :disabled="vForgot.$invalid">
                             Submit
                         </button>
                     </div>
@@ -28,51 +27,35 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import { onClickOutside } from '@vueuse/core';
 import { computed, reactive, ref } from 'vue';
 import { required, email } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
-export default {
-    name: 'ForgotPassword',
-    setup() {
-        const isModalOpen = ref(false)
-        const modal = ref(null)
-        onClickOutside(modal, () => (isModalOpen.value = false))
+const isModalOpen = ref(true)
+const modal = ref(null)
+onClickOutside(modal, () => (isModalOpen.value = false))
 
-        const state = reactive({
-            email: ref(null)
-        });
+const forgotState = reactive({
+    email: ref(null)
+})
 
-        const rules = computed(() => {
-            return {
-                email: { required, email }
-            }
-        });
-
-        const v$ = useVuelidate(rules, state, {
-            $autoDirty: true,
-        });
-
-        return {
-            isModalOpen,
-            modal,
-            state,
-            v$
-        }
-    },
-    methods: {
-        forgot() {
-            this.v$.$validate();
-            if (!this.v$.$error) {
-                this.$refs.myForgotForm.reset();
-            } else {
-                alert("Failed");
-            }
-        }
+const forgotRules = computed(() => {
+    return {
+        email: { required, email }
     }
+})
+
+const vForgot = useVuelidate(forgotRules, forgotState, {
+    $autoDirty: true,
+})
+
+
+const forgot = () => {
+    alert(forgotState.email);
 }
+
 </script>
 
 <style scoped>
