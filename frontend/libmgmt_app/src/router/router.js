@@ -31,6 +31,11 @@ const routes = [
         name: 'UserHome',
         component: () => import("../components/UserHome.vue"),
         path: '/userHome'
+    },
+    {
+        name: 'SectionBookExplorer',
+        component: () => import("../components/SectionBookExplorer.vue"),
+        path: '/explorer'
     }
 ];
 
