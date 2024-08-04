@@ -75,8 +75,14 @@
             <div class="col-md-9 offset-md-0 col-lg-9 offset-lg-0 col-sm-10 offset-sm-1">
                 <div class="bg-primary bg-gradient p-4 rounded mb-2">
                     <h2 class="text-dark">Quick Links: </h2>
-                    <h5>Create new Section <button class="btn btn-dark">Add Section</button></h5>
-                    <h5>Add new E-book <button class="btn btn-dark">Upload E-book</button></h5>
+                    <h5>Create new Section
+                        <button class="btn btn-dark" @click="loadSectionComponent">Add Section</button>
+                        <component :is="sectionModal" v-if="isSectionModalLoaded" @close="unloadSectionComponent">
+                        </component>
+                    </h5>
+                    <h5>Add new E-book <button class="btn btn-dark" @click="loadEBookComponent">Upload E-book</button>
+                        <component :is="ebookModal" v-if="isEBookModalLoaded" @close="unloadEBookComponent"></component>
+                    </h5>
                 </div>
                 <div v-if="searchResults">
                     <h2>Your search result: {{ searchResults }}</h2>
@@ -84,30 +90,39 @@
                 <div v-else>
                     <div class="border border-info p-4 rounded mb-2">
                         <h2 class="text-info">Sections</h2>
-                        <div class="row">
-                            <div class="col-md-3 col-lg-3 col-sm-5">
-                                <div class="card bg-info bg-gradient mt-2">
+                        <div class="d-flex justify-content-center" v-if="loading">
+                            <div class="spinner-border text-info m-5" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <div class="row" v-else>
+                            <div class="col-md-4 col-lg-3 col-sm-5" v-for="section in topSections" :key="section.id">
+                                <div class="card bg-info bg-gradient mt-2 myCard">
                                     <div class="card-header">
-                                        <h5 class="text-dark">Science Friction</h5>
+                                        <h5 class="text-dark">{{ section.name }}</h5>
                                     </div>
                                     <div class="card-body">
-                                        <p class="card-title text-dark mb-3">07/07/2024</p>
-                                        <p class="text-dark">This is the random description for the section.</p>
+                                        <p class="card-title text-dark mb-3">{{ section.dateCreated }}</p>
+                                        <p class="text-dark">{{ section.description }}</p>
+                                    </div>
+                                    <div class="card-footer">
                                         <div class="d-flex justify-content-between">
-                                            <button class="btn btn-dark">View</button>
-                                            <button class="btn btn-danger">Delete</button>
+                                            <button class="btn btn-dark" @click="viewSection(section.id)">View</button>
+                                            <button class="btn btn-danger" @click="deleteCurrentSection(section.id)">Delete</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <h5 class="mt-3 d-flex"><router-link to="/explorer" class="text-decoration-none text-info ms-auto">View all</router-link></h5>
+                        <h5 class="mt-3 d-flex"><router-link to="/explorer"
+                                class="text-decoration-none text-info ms-auto">View all</router-link>
+                        </h5>
                     </div>
                     <div class="border border-light p-4 rounded mb-2">
                         <h2 class="text-light">E-books</h2>
                         <div class="row">
-                            <div class="col-md-3 col-lg-3 col-sm-5">
-                                <div class="card bg-light bg-gradient mt-2">
+                            <div class="col-md-4 col-lg-3 col-sm-5">
+                                <div class="card bg-light bg-gradient mt-2 myCard">
                                     <div class="card-header">
                                         <h5 class="text-dark">Shiva's trilogy: First part</h5>
                                     </div>
@@ -122,7 +137,8 @@
                                 </div>
                             </div>
                         </div>
-                        <h5 class="mt-3 d-flex"><router-link to="/explorer" class="text-decoration-none text-light ms-auto">View all</router-link></h5>
+                        <h5 class="mt-3 d-flex"><router-link to="/explorer"
+                                class="text-decoration-none text-light ms-auto">View all</router-link></h5>
                     </div>
                 </div>
             </div>
@@ -133,11 +149,43 @@
 <script setup>
 import useVuelidate from '@vuelidate/core';
 import { required, alphaNum } from '@vuelidate/validators';
-import { computed, reactive, ref } from 'vue';
+import { computed, defineAsyncComponent, reactive, ref, shallowRef, onMounted } from 'vue';
+import { useSectionStore } from '@/stores/sectionStore';
+import { useRouter } from 'vue-router';
+import { useAlertStore } from '@/stores/alertStore';
 
 const admin = {
     "name": localStorage.getItem('name'),
     "user_id": localStorage.getItem('user_id')
+}
+const router = useRouter();
+const alertStore = useAlertStore();
+
+const sectionModal = shallowRef(null)
+const isSectionModalLoaded = shallowRef(false)
+
+function loadSectionComponent() {
+    isSectionModalLoaded.value = true;
+    sectionModal.value = defineAsyncComponent(() => import("../components/AddSection.vue"))
+}
+
+async function unloadSectionComponent() {
+    isSectionModalLoaded.value = false;
+    sectionModal.value = null;
+    await getAllSections();
+}
+
+const ebookModal = shallowRef(null)
+const isEBookModalLoaded = shallowRef(false)
+
+function loadEBookComponent() {
+    isEBookModalLoaded.value = true;
+    ebookModal.value = defineAsyncComponent(() => import("../components/AddEBook.vue"))
+}
+
+function unloadEBookComponent() {
+    isEBookModalLoaded.value = false;
+    ebookModal.value = null;
 }
 
 const searchState = reactive({
@@ -172,24 +220,46 @@ const toggleList = (() => {
     showList.value = !showList.value;
 });
 
+const sectionStore = useSectionStore();
+const topSections = ref([]);
+
+const getAllSections = ( async ()=> {
+    try {
+        loading.value = true;
+        await sectionStore.retrieveAllSections();
+        loading.value = false;
+        topSections.value = sectionStore.allSections.filter(section => section.name.toLowerCase().startsWith('f'));
+    }
+    catch (error) {
+        console.log(error);
+    }
+})
+
+onMounted(async () => {
+    await getAllSections();
+})
+
+function viewSection(id){
+    router.push({name: 'ViewSection', params: {sectionId: id}});
+}
+
+const deleteCurrentSection = (async (id) =>  {
+    try{
+        await sectionStore.deleteSection(id);
+        await getAllSections();
+        setTimeout(() => {
+            alertStore.success("Section deleted successfully")
+        }, 200)
+    }catch (error) {
+        console.log(sectionStore.errorMessage);
+        let message = "Section Delete failed: " + sectionStore.errorMessage;
+        alertStore.error(message);
+    }
+})
+
 </script>
 
 <style scoped>
-::-webkit-scrollbar {
-    width: 12px;
-}
-
-::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px rgba(33, 37, 41, 1);
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-    border-radius: 10px;
-    background-color: #212529;
-    -webkit-box-shadow: inset 0 0 6px rgba(90, 90, 90, 0.7);
-}
-
 .myRequestCont {
     min-height: 100dvh;
     max-height: 100dvh;
@@ -198,5 +268,9 @@ const toggleList = (() => {
 
 .myLink {
     cursor: pointer;
+}
+
+.myCard{
+    min-height: 40dvh;
 }
 </style>

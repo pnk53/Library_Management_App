@@ -80,7 +80,7 @@ def userLogin():
             {
                 "name": username,
                 "user_id": currentUser.id,
-                "exp": datetime.utcnow() + timedelta(minutes=2)
+                "exp": datetime.utcnow() + timedelta(minutes=120)
             },
             LocalConfig.JWT_SECRET_KEY,
             algorithm="HS256",
@@ -93,7 +93,7 @@ def userLogin():
                 "name": username,
                 "user_id": currentUser.id,
                 "userType": currentUser.userType,
-                "exp": (datetime.utcnow() + timedelta(minutes=2)).strftime('%Y-%m-%d %H:%M:%S'),
+                "exp": (datetime.utcnow() + timedelta(minutes=120)).strftime('%Y-%m-%d %H:%M:%S'),
             }
         ), 201
         

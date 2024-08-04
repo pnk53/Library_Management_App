@@ -36,6 +36,11 @@ const routes = [
         name: 'SectionBookExplorer',
         component: () => import("../components/SectionBookExplorer.vue"),
         path: '/explorer'
+    },
+    {
+        name: 'ViewSection',
+        component: () => import("../components/ViewSection.vue"),
+        path: '/section/:sectionId'
     }
 ];
 
@@ -45,5 +50,16 @@ const router = createRouter(
         routes
     }
 )
+
+router.beforeEach((to, from, next)=>{
+    const currentUserRole = localStorage.getItem('userType');
+    const adminRoutes = ['/librarianHome'];
+    
+    if (adminRoutes.includes(to.path) && currentUserRole != 'Librarian'){
+        return next('/userHome');
+    }
+
+    next();
+})
 
 export default router

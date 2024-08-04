@@ -33,7 +33,12 @@
             </div>
         </div>
         <div class="border border-3 border-info rounded m-5 p-3 mySectionCont d-flex flex-column">
-            <h2 class="text-info">Sections</h2>
+            <div class="d-flex mb-2">
+                <h2 class="text-info">Sections</h2>
+                <button class="btn btn-outline-info ms-auto" :hidden="!isAdmin" @click="loadSectionComponent">Add Section</button>
+                <component :is="sectionModal" v-if="isSectionModalLoaded" @close="unloadSectionComponent">
+                </component>
+            </div>
             <div class="d-flex justify-content-center" v-if="loading">
                 <div class="spinner-border text-info m-5" role="status">
                     <span class="visually-hidden">Loading...</span>
@@ -43,16 +48,19 @@
                 <div class="row" :key="currentSectionPage">
                     <div class="col-lg-3 col-lg-0 col-md-3 offset-md-0 col-sm-10 offset-sm-1"
                         v-for="section in sectionPagination" :key="section.name">
-                        <div class="card bg-info bg-gradient mt-2 mb-2">
+                        <div class="card bg-info bg-gradient mt-2 mb-2 myCard">
                             <div class="card-header">
                                 <h5 class="text-dark">{{ section.name }}</h5>
                             </div>
                             <div class="card-body">
                                 <p class="card-title text-dark mb-3">{{ section.rating }}</p>
                                 <p class="text-dark">{{ section.description }}</p>
+                            </div>
+                            <div class="card-footer">
                                 <div class="d-flex justify-content-between">
-                                    <button class="btn btn-dark">View</button>
-                                    <button class="btn btn-danger" v-if="isAdmin">Delete</button>
+                                    <button class="btn btn-dark" @click="viewSection(section.id)">View</button>
+                                    <button class="btn btn-danger" v-if="isAdmin"
+                                        @click="deleteCurrentSection(section.id)">Delete</button>
                                 </div>
                             </div>
                         </div>
@@ -120,17 +128,23 @@
 </template>
 
 <script setup>
+import { useAlertStore } from '@/stores/alertStore';
+import { useSectionStore } from '@/stores/sectionStore';
 import useVuelidate from '@vuelidate/core';
 import { required, alpha } from '@vuelidate/validators';
-import { computed, reactive, ref } from 'vue';
+import { computed, reactive, ref, onMounted, shallowRef, defineAsyncComponent } from 'vue';
+import { useRouter } from 'vue-router';
 
 const loading = ref(false)
+const sectionStore = useSectionStore();
+const alertStore = useAlertStore();
+const router = useRouter();
 
 const isAdmin = computed(() => {
-    if (localStorage.getItem('userType') == 'Librarian'){
+    if (localStorage.getItem('userType') == 'Librarian') {
         return true;
     }
-    else{
+    else {
         return false;
     }
 })
@@ -159,21 +173,40 @@ const clearSearch = (() => {
     searchResults.value = null;
 })
 
-const sections = ref([
-    { name: 'Section 1', description: 'Description 1', rating: 4.5 },
-    { name: 'Section 2', description: 'Description 2', rating: 4.0 },
-    { name: 'Section 3', description: 'Description 3', rating: 3.5 },
-    { name: 'Section 4', description: 'Description 4', rating: 5.0 },
-    { name: 'Section 5', description: 'Description 5', rating: 4.2 },
-    { name: 'Section 6', description: 'Description 6', rating: 3.8 },
-    { name: 'Section 7', description: 'Description 7', rating: 4.7 },
-    { name: 'Section 8', description: 'Description 8', rating: 3.9 },
-    { name: 'Section 9', description: 'Description 9', rating: 4.3 },
-    { name: 'Section 10', description: 'Description 10', rating: 4.6 }
-]);
+const sectionModal = shallowRef(null)
+const isSectionModalLoaded = shallowRef(false)
+
+function loadSectionComponent() {
+    isSectionModalLoaded.value = true;
+    sectionModal.value = defineAsyncComponent(() => import("../components/AddSection.vue"))
+}
+
+async function unloadSectionComponent() {
+    isSectionModalLoaded.value = false;
+    sectionModal.value = null;
+    await getAllSections();
+}
+
+const sections = ref([]);
 
 const cardsPerPage = 8;
 const currentSectionPage = ref(1);
+
+const getAllSections = (async () => {
+    try {
+        loading.value = true;
+        await sectionStore.retrieveAllSections();
+        loading.value = false;
+        sections.value = sectionStore.allSections;
+    }
+    catch (error) {
+        console.log(error);
+    }
+})
+
+onMounted(async () => {
+    await getAllSections();
+})
 
 const totalSectionPages = computed(() => Math.ceil(sections.value.length / cardsPerPage));
 
@@ -198,6 +231,24 @@ const nextSectionPage = () => {
 const goToSectionPage = (page) => {
     currentSectionPage.value = page;
 };
+
+function viewSection(id) {
+    router.push({ name: 'ViewSection', params: { sectionId: id } });
+}
+
+const deleteCurrentSection = (async (id) => {
+    try {
+        await sectionStore.deleteSection(id);
+        await getAllSections();
+        setTimeout(() => {
+            alertStore.success("Section deleted successfully")
+        }, 200)
+    } catch (error) {
+        console.log(sectionStore.errorMessage);
+        let message = "Section Delete failed: " + sectionStore.errorMessage;
+        alertStore.error(message);
+    }
+})
 
 const ebooks = ref([
     { name: 'EBook 1', description: 'Description 1', rating: 4.5 },
@@ -253,5 +304,9 @@ const goToEBookPage = (page) => {
 
 .mySectionCont {
     min-height: 80dvh;
+}
+
+.myCard {
+    min-height: 40dvh;
 }
 </style>

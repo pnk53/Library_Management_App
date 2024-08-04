@@ -15,7 +15,7 @@
                     <li class="nav-item" v-if="isLogged">
                         <router-link class="nav-link text-black" to="/explorer" active-class="active" exact-active-class="extract-active">Explorer</router-link>
                     </li>
-                    <li class="nav-item" v-if="isAdmin">
+                    <li class="nav-item" v-if="isAdmin && isLogged">
                         <a class="nav-link text-black" href="#">Stats</a>
                     </li>
                     <li class="nav-item">
@@ -97,7 +97,12 @@ const isAdmin = computed(() => {
 })
 
 const userHome = computed(() => {
-    return localStorage.getItem('userType') == 'Librarian' ? '/librarianHome' : '/userHome';
+    if(localStorage.getItem('userType') == 'Librarian'){
+        return "/librarianHome";
+    }
+    else{
+        return "/userHome";
+    }
 })
 
 const logout = (() => {
