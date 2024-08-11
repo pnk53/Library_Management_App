@@ -16,7 +16,7 @@
                         <router-link class="nav-link text-black" to="/explorer" active-class="active" exact-active-class="extract-active">Explorer</router-link>
                     </li>
                     <li class="nav-item" v-if="isAdmin && isLogged">
-                        <a class="nav-link text-black" href="#">Stats</a>
+                        <router-link class="nav-link text-black" to="/stats" active-class="active" exact-active-class="extract-active">Stats</router-link>
                     </li>
                     <li class="nav-item">
                         <router-link class="nav-link text-black" to="/AboutUs" active-class="active" exact-active-class="extract-active">About Us</router-link>

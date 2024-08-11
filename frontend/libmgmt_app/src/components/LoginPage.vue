@@ -143,8 +143,15 @@ const onLogin = async () => {
   }
   catch (error) {
     console.log(userStore.errorMessage);
-    let message = "Login failed: " + userStore.errorMessage;
-    alertStore.error(message);
+    console.log(error.message);
+    let message = "Login failed: ";
+        if(userStore.errorMessage){
+            message = message + userStore.errorMessage;
+        }
+        else{
+            message = message + error.message;
+        }
+        alertStore.error(message);
   }
 }
 

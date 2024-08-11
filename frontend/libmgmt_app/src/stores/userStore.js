@@ -55,6 +55,13 @@ export const useUserStore = defineStore('userStore', () => {
             localStorage.setItem('userType', user.value.userType),
             localStorage.setItem('jwt', user.value.jwt),
             localStorage.setItem('exp', user.value.exp)
+
+            await currentUser(user.value.user_id);
+            if(selectedUser.value.flagged == true){
+                throw new Error("You have been flagged.")
+            }
+            
+            await updateVisitedToday(user.value.user_id);
         }
         catch(error){
             errorMessage.value = error.response ? error.response.data.message : error.message;
@@ -117,12 +124,50 @@ export const useUserStore = defineStore('userStore', () => {
         }
     }
 
+    async function flagUser(id, status){
+        const flagUserPayLoad = {
+            flagged: status
+        };
+        try{
+            await axios.put(`http://localhost:5000/api/user/${id}`, flagUserPayLoad, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('jwt')
+                }
+            })
+        }
+        catch(error){
+            errorMessage.value = error.response ? error.response.data.message.message : error.message;
+            throw Error(error);
+        }
+    }
+
+    async function updateVisitedToday(id){
+        const updateVisitedTodayPayLoad = {
+            visitedToday: true
+        };
+        try{
+            await axios.put(`http://localhost:5000/api/user/${id}`, updateVisitedTodayPayLoad, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('jwt')
+                }
+            })
+        }
+        catch(error){
+            errorMessage.value = error.response ? error.response.data.message.message : error.message;
+            throw Error(error);
+        }
+    }
+
     return{
         userRegistration,
         userLogin,
         retrieveAllUsers,
         currentUser,
         userUpdate,
+        flagUser,
+        updateVisitedToday,
         user,
         errorMessage,
         selectedUser,

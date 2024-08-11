@@ -230,7 +230,7 @@
 </template>
 
 <script setup>
-import useVuelidate from '@vuelidate/core';
+import { useVuelidate } from '@vuelidate/core';
 import { required } from '@vuelidate/validators';
 import { computed, defineAsyncComponent, reactive, ref, shallowRef, onMounted } from 'vue';
 import { useSectionStore } from '@/stores/sectionStore';
