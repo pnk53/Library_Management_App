@@ -16,6 +16,16 @@ user_parser.add_argument("email", type=str, required=True)
 user_parser.add_argument("username", type=str, required=True)
 user_parser.add_argument("password", type=str, required=True)
 
+user_update_parser = reqparse.RequestParser()
+user_update_parser.add_argument("userType", type=str)
+user_update_parser.add_argument("visitedToday", type=bool)
+user_update_parser.add_argument("flagged", type=bool)
+user_update_parser.add_argument("firstName", type=str)
+user_update_parser.add_argument("lastName", type=str)
+user_update_parser.add_argument("email", type=str)
+user_update_parser.add_argument("username", type=str)
+user_update_parser.add_argument("password", type=str)
+
 user_fields={
     "id": fields.Integer,
     "userType": fields.String,
@@ -23,6 +33,7 @@ user_fields={
     "flagged": fields.Boolean,
     "firstName": fields.String,
     "lastName": fields.String,
+    "email": fields.String,
     "username": fields.String,
 }
 
@@ -57,7 +68,7 @@ class UserResource(Resource):
     def put(self, user_id=None):
         if user_id:
             user_not_found(user_id)
-            data = user_parser.parse_args()
+            data = user_update_parser.parse_args()
             currentUser = User.query.get(user_id)
             for d in data:
                 if data[d] is not None:

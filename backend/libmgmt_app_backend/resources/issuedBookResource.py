@@ -7,14 +7,27 @@ from libmgmt_app_backend.models.issuedBook import IssuedBook
 
 issuedBook_parser = reqparse.RequestParser()
 issuedBook_parser.add_argument("status", type=str, required=True)
+issuedBook_parser.add_argument("bookName", type=str, required=True)
+issuedBook_parser.add_argument("issuerName", type=str, required=True)
 issuedBook_parser.add_argument("bookId", type=int, required=True)
 issuedBook_parser.add_argument("userId", type=int, required=True)
-issuedBook_parser.add_argument("issuedDate", type=str, required=True)
-issuedBook_parser.add_argument("returnedDate", type=str, required=True)
+issuedBook_parser.add_argument("issuedDate", type=str)
+issuedBook_parser.add_argument("returnedDate", type=str)
+
+issuedBook_update_parser = reqparse.RequestParser()
+issuedBook_update_parser.add_argument("status", type=str)
+issuedBook_parser.add_argument("bookName", type=str)
+issuedBook_parser.add_argument("issuerName", type=str)
+issuedBook_update_parser.add_argument("bookId", type=int)
+issuedBook_update_parser.add_argument("userId", type=int)
+issuedBook_update_parser.add_argument("issuedDate", type=str)
+issuedBook_update_parser.add_argument("returnedDate", type=str)
 
 issuedBook_fields={
     "id": fields.Integer,
     "status": fields.String,
+    "bookName": fields.String,
+    "issuerName": fields.String,
     "bookId": fields.Integer,
     "userId": fields.Integer,
     "issuedDate": fields.String,
@@ -52,7 +65,7 @@ class IssuedBookResource(Resource):
     def put(self, issuedBook_id=None):
         if issuedBook_id:
             issuedBook_not_found(issuedBook_id)
-            data = issuedBook_parser.parse_args()
+            data = issuedBook_update_parser.parse_args()
             currentIssuedBook = IssuedBook.query.get(issuedBook_id)
             for d in data:
                 if data[d] is not None:
@@ -71,7 +84,7 @@ class IssuedBookResource(Resource):
         except IntegrityError as e:
             db.session.rollback()
             abort(409,{
-                "message": "Issued Book {} already exist".format(newIssuedBook.name),
+                "message": "Issued Book {} already exist".format(newIssuedBook.bookId),
                 "data": None,
                 "error": str(e),
             })

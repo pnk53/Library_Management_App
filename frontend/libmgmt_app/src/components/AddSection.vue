@@ -57,8 +57,8 @@
 <script setup>
 import { onClickOutside } from '@vueuse/core';
 import { computed, reactive, ref, defineEmits } from 'vue';
-import { required } from '@vuelidate/validators'
-import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators';
+import { useVuelidate } from '@vuelidate/core';
 import { useAlertStore } from '@/stores/alertStore';
 import { useSectionStore } from '@/stores/sectionStore';
 

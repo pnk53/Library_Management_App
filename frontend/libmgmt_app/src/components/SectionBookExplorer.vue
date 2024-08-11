@@ -27,15 +27,50 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div v-if="searchResults">
-                <h2>Your search result: {{ searchResults }}</h2>
+        <div class="row p-5">
+            <div v-if="searchedSectionResults.length > 0 || searchedEBookResults.length > 0">
+                <h3 class="mt-5">Your search results: </h3>
+                <div class="bg-info bg-gradient rounded p-3 mt-3">
+                    <h5 class="text-dark">Sections</h5>
+                    <table class="table" v-if="searchedSectionResults.length > 0">
+                        <tr>
+                            <th>Name</th>
+                            <th>Published</th>
+                            <th>View</th>
+                        </tr>
+                        <tr v-for="section in searchedSectionResults" :key="section.id">
+                            <td>{{ section.name }}</td>
+                            <td>{{ section.dateCreated }}</td>
+                            <td><button class="btn" @click="viewSection(section.id)">View</button></td>
+                        </tr>
+                    </table>
+                    <h6 class="text-black" v-else>No Section matching your search: {{ searchState.search }}</h6>
+                </div>
+                <div class="bg-light bg-gradient rounded p-3 mt-3">
+                    <h5 class="text-dark">E-Books</h5>
+                    <table class="table" v-if="searchedEBookResults.length > 0">
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Status</th>
+                            <th>View</th>
+                        </tr>
+                        <tr v-for="book in searchedEBookResults" :key="book.id">
+                            <td>{{ book.title }}</td>
+                            <td>{{ book.author }}</td>
+                            <td>{{ book.status }}</td>
+                            <td><button class="btn" @click="viewEBook(book.id)">View</button></td>
+                        </tr>
+                    </table>
+                    <h6 class="text-black" v-else>No EBook matching your search: {{ searchState.search }}</h6>
+                </div>
             </div>
         </div>
         <div class="border border-3 border-info rounded m-5 p-3 mySectionCont d-flex flex-column">
             <div class="d-flex mb-2">
                 <h2 class="text-info">Sections</h2>
-                <button class="btn btn-outline-info ms-auto" :hidden="!isAdmin" @click="loadSectionComponent">Add Section</button>
+                <button class="btn btn-outline-info ms-auto" :hidden="!isAdmin" @click="loadSectionComponent">Add
+                    Section</button>
                 <component :is="sectionModal" v-if="isSectionModalLoaded" @close="unloadSectionComponent">
                 </component>
             </div>
@@ -48,13 +83,13 @@
                 <div class="row" :key="currentSectionPage">
                     <div class="col-lg-3 col-lg-0 col-md-3 offset-md-0 col-sm-10 offset-sm-1"
                         v-for="section in sectionPagination" :key="section.name">
-                        <div class="card bg-info bg-gradient mt-2 mb-2 myCard">
+                        <div class="card bg-info bg-gradient mt-2 mb-2 mySectionCard">
                             <div class="card-header">
-                                <h5 class="text-dark">{{ section.name }}</h5>
+                                <h5 class="text-black fst-italic">{{ section.name }}</h5>
                             </div>
                             <div class="card-body">
-                                <p class="card-title text-dark mb-3">{{ section.rating }}</p>
-                                <p class="text-dark">{{ section.description }}</p>
+                                <p class="card-title text-black">Description: {{ section.description }}</p>
+                                <p class="card-title text-black">Published: {{ section.dateCreated }}</p>
                             </div>
                             <div class="card-footer">
                                 <div class="d-flex justify-content-between">
@@ -83,7 +118,13 @@
             </nav>
         </div>
         <div class="border border-3 border-light rounded m-5 p-3 mySectionCont d-flex flex-column">
-            <h2 class="text-light">EBooks</h2>
+            <div class="d-flex mb-2">
+                <h2 class="text-light">E-Books</h2>
+                <button class="btn btn-outline-light ms-auto" :hidden="!isAdmin" @click="loadEBookComponent">Add
+                    EBook</button>
+                <component :is="ebookModal" v-if="isEBookModalLoaded" @close="unloadEBookComponent">
+                </component>
+            </div>
             <div class="d-flex justify-content-center" v-if="loading">
                 <div class="spinner-border text-light m-5" role="status">
                     <span class="visually-hidden">Loading...</span>
@@ -92,17 +133,25 @@
             <transition name="fade" mode="out-in" v-else>
                 <div class="row" :key="currentEBookPage">
                     <div class="col-lg-3 offset-lg-0 col-md-3 offset-md-0 col-sm-10 offset-sm-1"
-                        v-for="ebook in eBookPagination" :key="ebook.name">
-                        <div class="card bg-light bg-gradient mt-2 mb-2">
+                        v-for="ebook in eBookPagination" :key="ebook.id">
+                        <div class="card bg-light bg-gradient mt-2 mb-2 myCard">
                             <div class="card-header">
-                                <h5 class="text-dark">{{ ebook.name }}</h5>
+                                <h5 class="text-black fst-italic">{{ ebook.title }}</h5>
                             </div>
                             <div class="card-body">
-                                <p class="card-title text-dark mb-3">{{ ebook.rating }}</p>
-                                <p class="text-dark">{{ ebook.description }}</p>
+                                <p class="card-title text-dark mb-3">Author: {{ ebook.author }}</p>
+                                <p class="card-title text-dark mb-3">Language: {{ ebook.language }}</p>
+                                <p class="card-title text-dark mb-3">Published: {{ ebook.releaseDate }}</p>
+                                <p class="card-title text-dark mb-3">Section(s): {{ ebook.section }}</p>
+                                <p class="text-secondary">Status: {{ ebook.status }}</p>
+                                <p class="text-secondary">Rating: {{ ebook.rating }}</p>
+                            </div>
+                            <div class="card-footer">
                                 <div class="d-flex justify-content-between">
-                                    <button class="btn btn-dark">View</button>
-                                    <button class="btn btn-danger" v-if="isAdmin">Delete</button>
+                                    <button class="btn btn-dark" @click="viewEBook(ebook.id)">View</button>
+                                    <button class="btn btn-danger" v-if="isAdmin"
+                                        @click="deleteCurrentEBook(ebook.id)">Delete</button>
+                                    <button class="btn btn-success" v-if="!isAdmin && ebook.status ==='Available'" @click="onBookRequest(ebook)">Request</button>
                                 </div>
                             </div>
                         </div>
@@ -130,13 +179,17 @@
 <script setup>
 import { useAlertStore } from '@/stores/alertStore';
 import { useSectionStore } from '@/stores/sectionStore';
+import { useEBookStore } from '@/stores/ebookStore';
 import useVuelidate from '@vuelidate/core';
-import { required, alpha } from '@vuelidate/validators';
+import { required } from '@vuelidate/validators';
 import { computed, reactive, ref, onMounted, shallowRef, defineAsyncComponent } from 'vue';
 import { useRouter } from 'vue-router';
+import { useSearchStore } from '@/stores/searchStore';
+import { useIssuedBookStore } from '@/stores/issuedBookStore';
 
 const loading = ref(false)
 const sectionStore = useSectionStore();
+const eBookStore = useEBookStore();
 const alertStore = useAlertStore();
 const router = useRouter();
 
@@ -155,7 +208,7 @@ const searchState = reactive({
 
 const searchRules = computed(() => {
     return {
-        search: { required, alpha }
+        search: { required }
     }
 })
 
@@ -163,14 +216,23 @@ const vSearch = useVuelidate(searchRules, searchState, {
     $autoDirty: true
 })
 
-const searchResults = ref(null)
+const searchStore = useSearchStore();
+const searchedSectionResults = ref([]);
+const searchedEBookResults = ref([]);
 
-const onSearchSubmit = (() => {
-    return searchResults.value = searchState.search
+const onSearchSubmit = (async () => {
+    await searchStore.getAllSearchedSectionsAndEBooks(searchState.search.toLowerCase());
+    searchedSectionResults.value = searchStore.searchedSections;
+    searchedEBookResults.value = searchStore.searchedEBooks;
+    if(searchedSectionResults.value.length == 0 && searchedEBookResults.value.length == 0){
+        let message = "No search results for: " + searchState.search
+        alertStore.error(message);
+    }
 })
 
 const clearSearch = (() => {
-    searchResults.value = null;
+    searchedSectionResults.value = [];
+    searchedEBookResults.value = [];
 })
 
 const sectionModal = shallowRef(null)
@@ -187,6 +249,25 @@ async function unloadSectionComponent() {
     await getAllSections();
 }
 
+const ebookModal = shallowRef(null)
+const isEBookModalLoaded = shallowRef(false)
+
+function loadEBookComponent() {
+    isEBookModalLoaded.value = true;
+    ebookModal.value = defineAsyncComponent(() => import("../components/AddEBook.vue"))
+}
+
+async function unloadEBookComponent() {
+    isEBookModalLoaded.value = false;
+    ebookModal.value = null;
+    await getAllEbooks();
+}
+
+onMounted(async () => {
+    await getAllSections();
+    await getAllEbooks();
+})
+
 const sections = ref([]);
 
 const cardsPerPage = 8;
@@ -202,10 +283,6 @@ const getAllSections = (async () => {
     catch (error) {
         console.log(error);
     }
-})
-
-onMounted(async () => {
-    await getAllSections();
 })
 
 const totalSectionPages = computed(() => Math.ceil(sections.value.length / cardsPerPage));
@@ -250,18 +327,19 @@ const deleteCurrentSection = (async (id) => {
     }
 })
 
-const ebooks = ref([
-    { name: 'EBook 1', description: 'Description 1', rating: 4.5 },
-    { name: 'EBook 2', description: 'Description 2', rating: 4.0 },
-    { name: 'EBook 3', description: 'Description 3', rating: 3.5 },
-    { name: 'EBook 4', description: 'Description 4', rating: 5.0 },
-    { name: 'EBook 5', description: 'Description 5', rating: 4.2 },
-    { name: 'EBook 6', description: 'Description 6', rating: 3.8 },
-    { name: 'EBook 7', description: 'Description 7', rating: 4.7 },
-    { name: 'EBook 8', description: 'Description 8', rating: 3.9 },
-    { name: 'EBook 9', description: 'Description 9', rating: 4.3 },
-    { name: 'EBook 10', description: 'Description 10', rating: 4.6 }
-]);
+const ebooks = ref([]);
+
+const getAllEbooks = (async () => {
+    try {
+        loading.value = true;
+        await eBookStore.retrieveAllEBooks();
+        loading.value = false;
+        ebooks.value = eBookStore.allEBooks;
+    }
+    catch (error) {
+        console.log(error);
+    }
+})
 
 const currentEBookPage = ref(1);
 
@@ -289,6 +367,74 @@ const goToEBookPage = (page) => {
     currentEBookPage.value = page;
 };
 
+function viewEBook(id) {
+    router.push({ name: 'ViewEBook', params: { eBookId: id } });
+}
+
+const issuedBookStore = useIssuedBookStore();
+
+const onBookRequest = (async (selectedEbook) => {
+    try{
+
+        if(selectedEbook.status == "Issued"){
+            throw new Error("The book you are trying to request isn't available. Try again in few day !!")
+        }
+        const requesterDetails = {
+            userId: localStorage.getItem('user_id'),
+            username: localStorage.getItem('name')
+        }
+        const allRequested = ref([]);
+        const alreadyRequested = ref([]);
+        await issuedBookStore.retrieveAllIssuedBooks();
+        
+        alreadyRequested.value = issuedBookStore.allIssuedBooks.filter(ib => ib.status == "Requested" && ib.bookId == selectedEbook.id && ib.userId == requesterDetails.userId)
+
+        if(alreadyRequested.value.length > 0){
+            throw new Error("Already requested. Please wait for the book requested to be accepted !!")
+        }
+
+        allRequested.value = issuedBookStore.allIssuedBooks.filter(ib => ib.status == "Requested" && ib.userId == requesterDetails.userId);
+
+        if(allRequested.value.length > 5){
+            throw new Error("You cannot request more than 5 books at a time !!")
+        }
+
+        await issuedBookStore.requestBookDetails(selectedEbook.id, selectedEbook.title, requesterDetails);
+
+        await getAllEbooks();
+
+        setTimeout(() => {
+            alertStore.success("E-Book requested successfully") 
+        }, 200)
+    }
+    catch (error) {
+        console.log(issuedBookStore.errorMessage);
+        console.log(error.message);
+        let message = "Book Request failed: ";
+        if(issuedBookStore.errorMessage){
+            message = message + issuedBookStore.errorMessage;
+        }
+        else{
+            message = message + error.message;
+        }
+        alertStore.error(message);
+    }
+})
+
+const deleteCurrentEBook = (async (id) => {
+    try {
+        await eBookStore.deleteEBook(id);
+        await getAllEbooks();
+        setTimeout(() => {
+            alertStore.success("E-Book deleted successfully")
+        }, 200)
+    } catch (error) {
+        console.log(eBookStore.errorMessage);
+        let message = "E-Book Delete failed: " + eBookStore.errorMessage;
+        alertStore.error(message);
+    }
+})
+
 </script>
 
 <style scoped>
@@ -307,6 +453,31 @@ const goToEBookPage = (page) => {
 }
 
 .myCard {
-    min-height: 40dvh;
+    min-height: 55dvh;
+    max-height: 55dvh;
+}
+
+.mySectionCard {
+    min-height: 35dvh;
+    max-height: 35dvh;
+}
+
+table {
+    width: 100%;
+    border: 2px solid #000;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    color: #212529;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #212529;
+    color: white;
 }
 </style>

@@ -11,6 +11,12 @@ section_parser.add_argument("dateCreated", type=str, required=True)
 section_parser.add_argument("description", type=str)
 section_parser.add_argument("rating", type=int)
 
+section_update_parser = reqparse.RequestParser()
+section_update_parser.add_argument("name", type=str)
+section_update_parser.add_argument("dateCreated", type=str)
+section_update_parser.add_argument("description", type=str)
+section_update_parser.add_argument("rating", type=int)
+
 section_fields={
     "id": fields.Integer,
     "name": fields.String,
@@ -50,7 +56,7 @@ class SectionResource(Resource):
     def put(self, section_id=None):
         if section_id:
             section_not_found(section_id)
-            data = section_parser.parse_args()
+            data = section_update_parser.parse_args()
             currentSection = Section.query.get(section_id)
             for d in data:
                 if data[d] is not None:

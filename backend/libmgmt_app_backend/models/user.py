@@ -1,14 +1,12 @@
 from flask_login import UserMixin
-from sqlalchemy import Column, Integer, Sequence, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean
 from werkzeug.security import check_password_hash
-# from libmgmt_app_backend.models.book import Book
-# from libmgmt_app_backend.models.issuedBook import IssuedBook
 from libmgmt_app_backend.extensions import db
 
 
 class User(db.Model, UserMixin):
     __tablename__ = "user"
-    id = Column(Integer, Sequence('user_id_seq', start=1001, increment=1), primary_key=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     userType = Column(String(50), nullable=False)
     visitedToday = Column(Boolean, default=False, nullable=False)
     flagged = Column(Boolean, default=False, nullable=False)

@@ -7,6 +7,7 @@ export const useSectionStore = defineStore('section', () => {
     const errorMessage = ref(null);
     const section = ref(null);
     const allSections = ref([]);
+    const allSectionNames = ref([]);
     const selectedSection = ref({});
 
     async function sectionRegistration(sectionData){
@@ -102,14 +103,24 @@ export const useSectionStore = defineStore('section', () => {
         }
     }
 
+    async function getAllSectionNames() {
+        await retrieveAllSections();
+        allSectionNames.value = [];
+        allSections.value.forEach(s => {
+            allSectionNames.value.push(s.name);
+        })
+    }
+
     return{
         errorMessage,
         section,
         allSections,
+        allSectionNames,
         selectedSection,
         sectionRegistration,
         retrieveAllSections,
         currentSection,
+        getAllSectionNames,
         updateSection,
         deleteSection
     }

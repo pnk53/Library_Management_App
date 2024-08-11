@@ -40,19 +40,21 @@
                     </div>
                     <div class="mb-3">
                         <label for="section" class="form-label text-light">Section: </label>
-                        <input type="text" id="section" class="form-control" name="section" placeholder="Philosophy"
-                            v-model="ebookState.section" :class="{
+                        <Multiselect id="section" class="form-select mySelect" :searchable="false" :close-on-select="false"
+                            :clear-on-select="false" placeholder="Select sections" :options="sectionsNames"
+                            :multiple="true" name="section" v-model="ebookState.section" :class="{
                                 'is-invalid': vEbook.section.$error,
                                 'is-valid': !vEbook.section.$invalid,
-                            }" />
+                            }">
+                        </Multiselect>
                         <div class="invalid-feedback" v-if="vEbook.section.$error">
                             {{ vEbook.section.$errors[0].$message }}
                         </div>
                     </div>
                     <div class="mb-3">
                         <label for="date" class="form-label text-light">Release Date: </label>
-                        <input type="date" id="date" class="form-control" name="date"
-                            v-model="ebookState.releaseDate" :class="{
+                        <input type="date" id="date" class="form-control" name="date" v-model="ebookState.releaseDate"
+                            :class="{
                                 'is-invalid': vEbook.releaseDate.$error,
                                 'is-valid': !vEbook.releaseDate.$invalid,
                             }" />
@@ -62,10 +64,10 @@
                     </div>
                     <div class="mb-3">
                         <label for="ebook" class="form-label text-light">EBook: </label>
-                        <input type="file" id="ebook" class="form-control" name="ebook" @change="onEBookUpload" :class="{
-                                'is-invalid': vEbook.ebook.$error,
-                                'is-valid': !vEbook.ebook.$invalid,
-                            }" />
+                        <input type="file" id="ebook" class="form-control" accept=".epub" name="ebook" @change="onEBookUpload" :class="{
+                            'is-invalid': vEbook.ebook.$error,
+                            'is-valid': !vEbook.ebook.$invalid,
+                        }" />
                         <div class="invalid-feedback" v-if="vEbook.ebook.$error">
                             {{ vEbook.ebook.$errors[0].$message }}
                         </div>
@@ -88,10 +90,13 @@
 
 <script setup>
 import { onClickOutside } from '@vueuse/core';
-import { computed, reactive, ref, defineEmits } from 'vue';
-import { required, alpha } from '@vuelidate/validators'
+import { computed, reactive, ref, defineEmits, onMounted, onUnmounted } from 'vue';
+import { required, alpha, helpers } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 import { useAlertStore } from '@/stores/alertStore';
+import { useSectionStore } from '@/stores/sectionStore';
+import { useEBookStore } from '@/stores/ebookStore';
+import { Multiselect } from 'vue-multiselect';
 
 const isModalOpen = ref(true)
 const modal = ref(null)
@@ -103,21 +108,30 @@ onClickOutside(modal, () => {
 }
 )
 
-function closeModal(){
+function closeModal() {
     isModalOpen.value = !isModalOpen.value;
     emit('close');
 }
 
-const alertStore = useAlertStore()
+const alertStore = useAlertStore();
+const sectionStore = useSectionStore();
+const eBookStore = useEBookStore();
 
 const ebookState = reactive({
-
     title: ref(null),
     author: ref(null),
     language: ref(null),
     releaseDate: ref(null),
-    section: ref(null),
+    section: ref([]),
     ebook: ref(null)
+})
+
+const isEPubFile = ((file)=>{
+    if(!file){
+        return true;
+    }
+    const fileType = file.name.split('.').pop().toLowerCase();
+    return fileType === 'epub';
 })
 
 const ebookRules = computed(() => {
@@ -127,7 +141,7 @@ const ebookRules = computed(() => {
         language: { required, alpha },
         releaseDate: { required },
         section: { required },
-        ebook: { required },
+        ebook: { required, isEPubFile: helpers.withMessage('Please upload .epub file', isEPubFile) },
     }
 })
 
@@ -140,13 +154,33 @@ const vEbook = useVuelidate(ebookRules, ebookState, {
     $autoDirty: true,
 })
 
+const sectionsNames = ref([]);
 
-const onEBookSubmit = () => {
-    console.log(ebookState);
-    isModalOpen.value = false;
-    setTimeout(()=>{
-        alertStore.success("EBook added successfully")
-    },200)
+onMounted(async () => {
+    await sectionStore.getAllSectionNames();
+    sectionsNames.value = sectionStore.allSectionNames;
+})
+
+onUnmounted(() => {
+    sectionsNames.value = null
+})
+
+const onEBookSubmit = async () => {
+    try {
+        await eBookStore.addEBook(ebookState);
+        console.log(eBookStore.eBook);
+        isModalOpen.value = false;
+        emit('close');
+        setTimeout(() => {
+            alertStore.success("EBook added successfully")
+        }, 200)
+    }
+    catch (error) {
+        console.log(eBookStore.errorMessage);
+        let message = "EBook Registration failed: " + eBookStore.errorMessage;
+        alertStore.error(message);
+        console.log(error);
+    }
 }
 
 </script>

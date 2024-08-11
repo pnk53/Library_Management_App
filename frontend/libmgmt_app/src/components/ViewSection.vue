@@ -1,10 +1,9 @@
 <template>
     <div class="container-fluid">
-        <div class="row p-3">
-            <div class="bg-info bg=gradient rounded p-3 mt-4">
+            <div class="row bg-info bg=gradient rounded m-3 p-3 mt-4">
                 <div class="col-md-4 col-lg-4 col-sm-12 bg-dark p-5 rounded">
                     <div class="d-flex">
-                        <h2>Section Details</h2>
+                        <h2 class="text-info">Section Details</h2>
                         <a class="text-white ms-auto myLink" @click="editSection" :hidden="!isAdmin">
                             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor"
                                 class="bi bi-pencil-square" viewBox="0 0 16 16">
@@ -60,9 +59,23 @@
                         </button>
                     </div>
                 </div>
-
+                <div class="col-md-8 col-lg-8 col-sm-12">
+                    <table class="table rounded">
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Status</th>
+                            <th>View</th>
+                        </tr>
+                        <tr v-for="book in allEBookForSection" :key="book.id">
+                            <td>{{ book.title }}</td>
+                            <td>{{ book.author }}</td>
+                            <td>{{ book.status }}</td>
+                            <td><button class="btn" @click="viewEBook(book.id)">View</button></td>
+                        </tr>
+                    </table>
+                </div>
             </div>
-        </div>
     </div>
 </template>
 
@@ -73,6 +86,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { required } from '@vuelidate/validators';
 import { useVuelidate } from '@vuelidate/core';
 import { useAlertStore } from '@/stores/alertStore';
+import { useEBookStore } from '@/stores/ebookStore';
 
 const selectedSec = ref({});
 const sectionStore = useSectionStore();
@@ -80,6 +94,8 @@ const route = useRoute();
 const isDisabled = ref(true);
 const router = useRouter();
 const alertStore = useAlertStore();
+const eBookStore = useEBookStore();
+const allEBookForSection = ref([]);
 
 function editSection() {
     isDisabled.value = !isDisabled.value;
@@ -98,6 +114,9 @@ onMounted(async () => {
     try {
         await sectionStore.currentSection(route.params.sectionId);
         selectedSec.value = sectionStore.selectedSection;
+
+        await eBookStore.retrieveAllEBooks();
+        allEBookForSection.value = eBookStore.allEBooks.filter(b => b.section.includes(selectedSec.value.name));
     }
     catch (error) {
         console.log(error);
@@ -125,6 +144,10 @@ const sectionRules = computed(() => {
 })
 
 const vSection = useVuelidate(sectionRules, sectionState)
+
+function viewEBook(id) {
+    router.push({ name: 'ViewEBook', params: { eBookId: id } });
+}
 
 const onSectionUpdate = async () => {
     const alertStore = useAlertStore();
@@ -162,4 +185,24 @@ const deleteCurrentSection = (async () => {
 .myLink {
     cursor: pointer;
 }
+
+table {
+    width: 100%;
+    border: 2px solid #000;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    color: #212529;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #212529;
+    color: white;
+}
+
 </style>

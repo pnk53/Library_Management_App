@@ -1,11 +1,11 @@
 from flask_login import UserMixin
-from sqlalchemy import Column, Integer, Sequence, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean
 
 from libmgmt_app_backend.extensions import db
 
 class Book(db.Model, UserMixin):
     __tablename__ = "book"
-    id = Column(Integer, Sequence('book_id_seq', start=10001, increment=1), primary_key=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     status = Column(String(50), nullable=False)
     flagged = Column(Boolean, default=False, nullable=False)
     title = Column(String(200), nullable=False)
@@ -18,10 +18,10 @@ class Book(db.Model, UserMixin):
     returnedDate = Column(String(50))
     rating = Column(Integer, nullable=False)
     totalRater = Column(Integer, nullable=False)
-    currentIssuer = Column(Integer, db.ForeignKey('user.id'), nullable=False)
+    currentIssuer = Column(Integer, db.ForeignKey('user.id'))
     issuedBook = db.relationship('IssuedBook', backref='book', lazy=True)
     
-    def __init__(self, status, flagged, title, author, language, releaseDate, section, contentPath, currentIssuer, issuedDate, returnedDate, rating, totalRates):
+    def __init__(self, status, flagged, title, author, language, releaseDate, section, contentPath, currentIssuer, issuedDate, returnedDate, rating, totalRater):
         self.status = status
         self.flagged = flagged
         self.title = title
@@ -34,7 +34,7 @@ class Book(db.Model, UserMixin):
         self.issuedDate = issuedDate
         self.returnedDate = returnedDate
         self.rating = rating
-        self.totalRater = totalRates
+        self.totalRater = totalRater
     
     def __repr__(self):
         return "<Book {}>".format(self.id)

@@ -41,6 +41,16 @@ const routes = [
         name: 'ViewSection',
         component: () => import("../components/ViewSection.vue"),
         path: '/section/:sectionId'
+    },
+    {
+        name: 'ViewEBook',
+        component: () => import("../components/ViewEBook.vue"),
+        path: '/eBook/:eBookId'
+    },
+    {
+        name: 'ProfileDetails',
+        component: () => import("../components/ProfileDetails.vue"),
+        path: '/profile'
     }
 ];
 

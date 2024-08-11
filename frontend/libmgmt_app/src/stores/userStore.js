@@ -2,10 +2,12 @@ import axios from "axios";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-export const useUserStore = defineStore('user', () => {
+export const useUserStore = defineStore('userStore', () => {
 
     const user = ref(null);
     const errorMessage = ref(null);
+    const allUsers = ref([]);
+    const selectedUser = ref({});
 
     async function userRegistration(userData){
 
@@ -60,10 +62,70 @@ export const useUserStore = defineStore('user', () => {
         }
     }
 
+    async function retrieveAllUsers(){
+        try{
+            const response =  await axios.get(`http://localhost:5000/api/user`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('jwt')
+                }
+            })
+            allUsers.value = Object.values(response.data).filter(u => u.userType == "User");
+        }
+        catch(error){
+            errorMessage.value = error.response ? error.response.data.message.message : error.message;
+            throw Error(error);
+        }
+    }
+
+    async function currentUser(id) {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/user/${id}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('jwt')
+                }
+            })
+            selectedUser.value = response.data;
+        }
+        catch (error) {
+            errorMessage.value = error.response ? error.response.data.message.message : error.message;
+            throw Error(error);
+        }
+    }
+
+    async function userUpdate(id, userData){
+
+        const userUpdatePayLoad = {
+            firstName : userData.firstName,
+            lastName : userData.lastName,
+            username : userData.username,
+            email : userData.email
+        };
+
+        try{
+            await axios.put(`http://localhost:5000/api/user/${id}`, userUpdatePayLoad, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('jwt')
+                }
+            })
+        }
+        catch(error){
+            errorMessage.value = error.response ? error.response.data.message.message : error.message;
+            throw Error(error);
+        }
+    }
+
     return{
         userRegistration,
         userLogin,
+        retrieveAllUsers,
+        currentUser,
+        userUpdate,
         user,
-        errorMessage
+        errorMessage,
+        selectedUser,
+        allUsers
     }
 })
