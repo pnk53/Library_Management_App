@@ -60,20 +60,25 @@
                     </div>
                 </div>
                 <div class="col-md-8 col-lg-8 col-sm-12">
-                    <table class="table rounded">
-                        <tr>
-                            <th>Title</th>
-                            <th>Author</th>
-                            <th>Status</th>
-                            <th>View</th>
-                        </tr>
-                        <tr v-for="book in allEBookForSection" :key="book.id">
-                            <td>{{ book.title }}</td>
-                            <td>{{ book.author }}</td>
-                            <td>{{ book.status }}</td>
-                            <td><button class="btn" @click="viewEBook(book.id)">View</button></td>
-                        </tr>
-                    </table>
+                    <div v-if="allEBookForSection.length > 0">
+                        <table class="table rounded">
+                            <tr>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th>Status</th>
+                                <th>View</th>
+                            </tr>
+                            <tr v-for="book in allEBookForSection" :key="book.id">
+                                <td>{{ book.title }}</td>
+                                <td>{{ book.author }}</td>
+                                <td>{{ book.status }}</td>
+                                <td><button class="btn" @click="viewEBook(book.id)">View</button></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div v-else>
+                        <h4 class="text-dark m-5 text-center">No Ebooks yet in this section.</h4>
+                    </div>
                 </div>
             </div>
     </div>

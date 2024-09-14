@@ -55,7 +55,7 @@
                         </div>
                         <div v-else>
                             <div v-if="allOngoingBooks.length == 0" class="mt-3 p-2">
-                                <h5 class="text-white">You have no requests to be revoked.</h5>
+                                <p class="text-white text-center">You have no requests to be revoked.</p>
                             </div>
                             <div class="card-group">
                                 <div class="col-md-12 col-lg-12 col-sm-12" v-for="Obook in allOngoingBooks"
@@ -86,7 +86,7 @@
                         </div>
                         <div v-else>
                             <div v-if="allRequestedBooks.length == 0" class="mt-3 p-2">
-                                <h5 class="text-white">You have no pending book requests.</h5>
+                                <p class="text-white text-center">You have no pending book requests.</p>
                             </div>
                             <div class="card-group">
                                 <div class="col-md-12 col-lg-12 col-sm-12" v-for="Rbook in allRequestedBooks" :key="Rbook.id">
@@ -166,23 +166,28 @@
                             </div>
                         </div>
                         <div class="row" v-else>
-                            <div class="col-md-4 col-lg-3 col-sm-5" v-for="section in topSections" :key="section.id">
-                                <div class="card bg-info bg-gradient mt-2 mySectionCard">
-                                    <div class="card-header">
-                                        <h5 class="text-dark fst-italic">{{ section.name }}</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="card-title text-dark">Description: {{ section.description }}</p>
-                                        <p class="text-secondary">Published: {{ section.dateCreated }}</p>
-                                    </div>
-                                    <div class="card-footer">
-                                        <div class="d-flex justify-content-between">
-                                            <button class="btn btn-dark" @click="viewSection(section.id)">View</button>
-                                            <button class="btn btn-danger"
-                                                @click="deleteCurrentSection(section.id)">Delete</button>
+                            <div v-if="topSections.length > 0">
+                                <div class="col-md-4 col-lg-3 col-sm-5" v-for="section in topSections" :key="section.id">
+                                    <div class="card bg-info bg-gradient mt-2 mySectionCard">
+                                        <div class="card-header">
+                                            <h5 class="text-dark fst-italic">{{ section.name }}</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="card-title text-dark">Description: {{ section.description }}</p>
+                                            <p class="text-secondary">Published: {{ section.dateCreated }}</p>
+                                        </div>
+                                        <div class="card-footer">
+                                            <div class="d-flex justify-content-between">
+                                                <button class="btn btn-dark" @click="viewSection(section.id)">View</button>
+                                                <button class="btn btn-danger"
+                                                    @click="deleteCurrentSection(section.id)">Delete</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            <div v-else>
+                                <h6 class="text-secondary">No Sections added yet. Please add section(s).</h6>
                             </div>
                         </div>
                         <h5 class="mt-3 d-flex"><router-link to="/explorer"
@@ -197,26 +202,31 @@
                             </div>
                         </div>
                         <div class="row" v-else>
-                            <div class="col-md-4 col-lg-3 col-sm-5" v-for="book in topEbooks" :key="book.id">
-                                <div class="card bg-light bg-gradient mt-2 myCard">
-                                    <div class="card-header">
-                                        <h5 class="text-dark fst-italic">{{ book.title }}</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="card-title text-dark mb-3">Author: {{ book.author }}</p>
-                                        <p class="card-title text-dark mb-3">Language: {{ book.language }}</p>
-                                        <p class="card-title text-dark mb-3">Published: {{ book.releaseDate }}</p>
-                                        <p class="text-secondary">Status: {{ book.status }}</p>
-                                        <p class="text-secondary">Rating: {{ book.rating }}</p>
-                                    </div>
-                                    <div class="card-footer">
-                                        <div class="d-flex justify-content-between">
-                                            <button class="btn btn-dark" @click="viewEBook(book.id)">View</button>
-                                            <button class="btn btn-danger"
-                                                @click="deleteCurrentEBook(book.id)">Delete</button>
+                            <div v-if="topEbooks.length > 0">
+                                <div class="col-md-4 col-lg-3 col-sm-5" v-for="book in topEbooks" :key="book.id">
+                                    <div class="card bg-light bg-gradient mt-2 myCard">
+                                        <div class="card-header">
+                                            <h5 class="text-dark fst-italic">{{ book.title }}</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="card-title text-dark mb-3">Author: {{ book.author }}</p>
+                                            <p class="card-title text-dark mb-3">Language: {{ book.language }}</p>
+                                            <p class="card-title text-dark mb-3">Published: {{ book.releaseDate }}</p>
+                                            <p class="text-secondary">Status: {{ book.status }}</p>
+                                            <p class="text-secondary">Rating: {{ book.rating }}</p>
+                                        </div>
+                                        <div class="card-footer">
+                                            <div class="d-flex justify-content-between">
+                                                <button class="btn btn-dark" @click="viewEBook(book.id)">View</button>
+                                                <button class="btn btn-danger"
+                                                    @click="deleteCurrentEBook(book.id)">Delete</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            <div v-else>
+                                <h6 class="text-secondary">No EBooks added yet. Please add ebook(s).</h6>
                             </div>
                         </div>
                         <h5 class="mt-3 d-flex"><router-link to="/explorer"

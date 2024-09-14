@@ -100,6 +100,9 @@
                             </div>
                         </div>
                     </div>
+                    <div v-if="sectionPagination.length == 0">
+                        <h5 class="text-secondary">No Sections added yet. Please add section(s).</h5>
+                    </div>
                 </div>
             </transition>
             <nav class="mt-5 mt-auto">
@@ -155,6 +158,9 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div v-if="eBookPagination.length == 0">
+                        <h5 class="text-secondary">No EBooks added yet. Please add ebook(s).</h5>
                     </div>
                 </div>
             </transition>

@@ -45,11 +45,13 @@ import { ref, defineEmits, reactive, computed } from 'vue';
 import { required } from '@vuelidate/validators';
 import { useVuelidate } from '@vuelidate/core';
 import { useUserStore } from '@/stores/userStore';
+import { useAlertStore } from '@/stores/alertStore'
 
 const isModalOpen = ref(true);
 const modal = ref(null);
 const emit = defineEmits(['close', 'submit']);
 const userStore = useUserStore();
+const alertStore = useAlertStore();
 const searchedResult = ref([]);
 
 onClickOutside(modal, () => {
@@ -81,8 +83,9 @@ const onSearch = (async () => {
     await userStore.retrieveAllUsers();
     const searchtoLower = searchState.search.toLowerCase();
     searchedResult.value = userStore.allUsers.filter(u => u.username.toLowerCase().includes(searchtoLower) || u.firstName.toLowerCase().includes(searchtoLower));
-    console.log(userStore.allUsers);
-    console.log(searchedResult);
+    if (searchedResult.value.length == 0){
+        alertStore.error("No Search results")
+    }
 })
 
 const OnAssign = ((userData)=>{
