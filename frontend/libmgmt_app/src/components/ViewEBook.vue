@@ -337,6 +337,7 @@ const editEBook = (() => {
 const onEBookUpdate = async () => {
     try {
         let totalRater = selectedEbook.value.totalRater
+        ebookState.section = Object.values(ebookState.section).join(', ');
         await eBookStore.updateEBook(route.params.eBookId, ebookState, totalRater);
         isDisabled.value = true;
         await loadSelectedBook();
@@ -358,7 +359,7 @@ const onEBookRate = (async() => {
         let totalRater = selectedEbook.value.totalRater + 1;
         let finalOverallRating = parseInt(Math.round(((selectedEbook.value.rating * (totalRater-1)) + ebookState.rating) / totalRater))
         console.log(finalOverallRating)
-        ebookState.rating = finalOverallRating.value;
+        ebookState.rating = finalOverallRating;
         await eBookStore.updateEBook(route.params.eBookId, ebookState, totalRater);
         isDisabled.value = true;
         setTimeout(() => {

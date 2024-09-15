@@ -27,7 +27,7 @@
                 </div>
             </div>
         </div>
-        <div class="row p-5">
+        <div class="row pe-5 ps-5">
             <div v-if="searchedUserResults.length > 0 || searchedUserFlaggedResults.length > 0">
                 <h3 class="mt-5">Your search results: </h3>
                 <div class="bg-info bg-gradient rounded p-3 mt-3">
@@ -44,7 +44,8 @@
                             <td>{{ user.email }}</td>
                             <td>{{ user.username }}</td>
                             <td>
-                                <button class="btn btn-warning pe-5 ps-5" @click="flagCurrentUser(user.id, true)">Flag</button>
+                                <button class="btn btn-warning pe-5 ps-5"
+                                    @click="flagCurrentUser(user.id, true)">Flag</button>
                             </td>
                         </tr>
                     </table>
@@ -63,7 +64,8 @@
                             <td>{{ user.email }}</td>
                             <td>{{ user.username }}</td>
                             <td>
-                                <button class="btn btn-warning pe-5 ps-5" @click="flagCurrentUser(user.id, false)">Un-Flag</button>
+                                <button class="btn btn-warning pe-5 ps-5"
+                                    @click="flagCurrentUser(user.id, false)">Un-Flag</button>
                             </td>
                         </tr>
                     </table>
@@ -71,198 +73,42 @@
             </div>
         </div>
         <div class="row p-5">
-            <div
-                class="col-md-5 offset-md-1 col-lg-5 offset-lg-1 col-sm-10 offset-sm-1 myCont border border-warning rounded p-3">
-                <h1 class="text-white fst-italic mb-4">User Stats</h1>
-                <ul class="list-group" data-bs-theme="light">
-                    <li class="list-group-item bg-warning bg-gradient" aria-current="true">
-                        <h3 class="text-dark">Total Users: {{ tUsers.length }}</h3>
-                    </li>
-                    <li class="list-group-item">
-                        <h5 class="text-dark">Active Users: {{ aUsers }}</h5>
-                    </li>
-                    <li class="list-group-item">
-                        <h5 class="text-dark">Blocked Users: {{ bUsers }}</h5>
-                    </li>
-                    <li class="list-group-item bg-warning bg-gradient" aria-current="true" @click="getPopular">
-                        <h4 class="text-dark">Other Stats</h4>
-                    </li>
-                    <li class="list-group-item" v-if="popularUsers.length > 0">
-                        <h5 class="text-dark">Popular Users:</h5>
-                        <h6 v-for="pU in popularUsers" :key="pU">{{ pU }}</h6>
-                    </li>
-                </ul>
-            </div>
-            <div
-                class="col-md-4 offset-md-1 col-lg-4 offset-lg-1 col-sm-10 offset-sm-1 myCont border border-info rounded p-3">
-                <h1 class="text-white fst-italic mb-4">Section Stats</h1>
-                <ul class="list-group" data-bs-theme="light">
-                    <li class="list-group-item bg-info bg-gradient" aria-current="true">
-                        <h3 class="text-dark">Total Sections: {{ tSections.length }}</h3>
-                    </li>
-                    <li class="list-group-item bg-info bg-gradient" @click="getPopularSection">
-                        <h5 class="text-dark">Other Stats:
-                        </h5>
-                    </li>
-                    <li class="list-group-item" v-if="popularSections.length > 0">
-                        <h5 class="text-dark">Popular Sections:</h5>
-                        <h6 v-for="pS in popularSections" :key="pS">{{ pS }}</h6>
-                    </li>
-                </ul>
+            <div class="btn-group btn-group-lg" role="group">
+                <button :class="['btn', selectedGraph === 'users' ? 'btn-warning' : 'btn-outline-warning']"
+                    @click="viewCurrentGraph('users')">Users</button>
+                <button :class="['btn', selectedGraph === 'sections' ? 'btn-warning' : 'btn-outline-warning']"
+                    @click="viewCurrentGraph('sections')">Sections</button>
+                <button :class="['btn', selectedGraph === 'books' ? 'btn-warning' : 'btn-outline-warning']"
+                    @click="viewCurrentGraph('books')">Books</button>
+                <button :class="['btn', selectedGraph === 'issued books' ? 'btn-warning' : 'btn-outline-warning']"
+                    @click="viewCurrentGraph('issued books')">Issued Books</button>
             </div>
         </div>
-        <div class="row p-5">
-            <div
-                class="col-md-5 offset-md-1 col-lg-5 offset-lg-1 col-sm-10 offset-sm-1 myCont border border-warning rounded p-3">
-                <h1 class="text-white fst-italic mb-4">Book Stats</h1>
-                <ul class="list-group" data-bs-theme="light">
-                    <li class="list-group-item bg-warning bg-gradient" aria-current="true">
-                        <h3 class="text-dark">Total Books: {{ tBooks.length }}</h3>
-                    </li>
-                    <li class="list-group-item">
-                        <h5 class="text-dark">Top Book:
-                            <div class="mt-2">
-                                <h6>Name: {{ hBook.name }}</h6>
-                                <h6>Author: {{ hBook.author }}</h6>
-                                <h6>Rating: {{ hBook.rating }}</h6>
-                            </div>
-                        </h5>
-                    </li>
-                    <li class="list-group-item bg-warning bg-gradient" aria-current="true" @click="getPopular">
-                        <h4 class="text-dark">Other Stats</h4>
-                    </li>
-                    <li class="list-group-item" v-if="popularBooks.length > 0">
-                        <h5 class="text-dark">Popular Books:</h5>
-                        <h6 v-for="pB in popularBooks" :key="pB">{{ pB }}</h6>
-                    </li>
-                </ul>
-            </div>
-            <div class="col-md-4 offset-md-1 col-lg-4 offset-lg-1 col-sm-10 myCont border border-info rounded p-3">
-                <h1 class="text-white fst-italic mb-4">Issued Book stats</h1>
-                <ul class="list-group" data-bs-theme="light">
-                    <li class="list-group-item bg-info bg-gradient" aria-current="true">
-                        <h3 class="text-dark">Total Issued Books: {{ tIssuedBooks.length }}</h3>
-                    </li>
-                    <li class="list-group-item">
-                        <h5 class="text-dark">Total Ongoing Books: {{ oIssuedBooks.length }}</h5>
-                    </li>
-                    <li class="list-group-item">
-                        <h5 class="text-dark">Total Revoked Books: {{ rIssuedBooks.length }}</h5>
-                    </li>
-                    <li class="list-group-item bg-info bg-gradient" aria-current="true" @click="getPopular">
-                        <h4 class="text-dark">Other Stats</h4>
-                    </li>
-                    <li class="list-group-item" v-if="popularBooks.length > 0">
-                        <h5 class="text-dark">Top Requested Book:
-                            <h6>{{ popularBooks[0] }}</h6>
-                        </h5>
-                    </li>
-                </ul>
-            </div>
+        <div class="row ps-5 pe-5">
+            <h3 class="text-center text-uppercase">{{ selectedGraph }} Statistics</h3>
+            <iframe ref="chartFrame" height="600" class="myIFrame">
+
+            </iframe>
         </div>
     </div>
 </template>
 
 <script setup>
-import { onMounted, ref, computed, reactive } from 'vue';
+import { onMounted, ref, computed, reactive, watch } from 'vue';
 import { required } from '@vuelidate/validators';
 import { useVuelidate } from '@vuelidate/core';
 import { useUserStore } from '@/stores/userStore';
-import { useSectionStore } from '@/stores/sectionStore';
 import { useEBookStore } from '@/stores/ebookStore';
 import { useIssuedBookStore } from '@/stores/issuedBookStore';
 import { useSearchStore } from '@/stores/searchStore';
 import { useAlertStore } from '@/stores/alertStore';
+import { Chart } from 'chart.js/auto';
 
 const userStore = useUserStore();
-const sectionStore = useSectionStore();
 const eBookStore = useEBookStore();
 const issuedBookStore = useIssuedBookStore();
 const searchStore = useSearchStore();
 const alertStore = useAlertStore();
-
-const tUsers = ref([]);
-const aUsers = ref(null);
-const bUsers = ref(null);
-const popularUsers = ref([]);
-
-const tSections = ref([]);
-const popularSections = ref([]);
-
-const tBooks = ref([]);
-const hBook = ref({});
-const popularBooks = ref([]);
-
-const tIssuedBooks = ref([]);
-const rIssuedBooks = ref([]);
-const oIssuedBooks = ref([]);
-
-const getPopular = (() => {
-    const userMap = new Map();
-    const bookMap = new Map();
-    tIssuedBooks.value.forEach(ib => {
-        if (userMap.has(ib.issuerName)) {
-            userMap.set(ib.issuerName, userMap.get(ib.issuerName) + 1);
-        }
-        else {
-            userMap.set(ib.issuerName, 1);
-        }
-
-        if (bookMap.has(ib.bookName)) {
-            bookMap.set(ib.bookName, bookMap.get(ib.bookName) + 1);
-        }
-        else {
-            bookMap.set(ib.bookName, 1);
-        }
-    });
-    const desUser = Array.from(userMap.entries()).sort((a, b) => b[1] - a[1]).slice(0, 2);
-    popularUsers.value = desUser.map(entry => entry[0]);
-    const desBook = Array.from(bookMap.entries()).sort((a, b) => b[1] - a[1]).slice(0, 2);
-    popularBooks.value = desBook.map(entry => entry[0]);
-})
-
-const getPopularSection = (() => {
-    const sectionMap = new Map();
-    tBooks.value.forEach(book => {
-        let sectionList = book.section.split(',');
-        for (let s in sectionList) {
-            if (sectionMap.has(sectionList[s])) {
-                sectionMap.set(sectionList[s], sectionMap.get(sectionList[s]) + 1);
-            }
-            else {
-                sectionMap.set(sectionList[s], 1);
-            }
-        }
-    });
-    const desSection = Array.from(sectionMap.entries()).sort((a, b) => b[1] - a[1]).slice(0, 2);
-    popularSections.value = desSection.map(entry => entry[0]);
-})
-
-onMounted(async () => {
-    await userStore.retrieveAllUsers();
-    tUsers.value = userStore.allUsers;
-    aUsers.value = userStore.allUsers.filter(u => u.flagged == false).length;
-    bUsers.value = userStore.allUsers.filter(u => u.flagged == true).length;
-
-    await sectionStore.retrieveAllSections();
-    tSections.value = sectionStore.allSections;
-
-    await eBookStore.retrieveAllEBooks();
-    tBooks.value = eBookStore.allEBooks;
-    const topBook = eBookStore.allEBooks.sort((a, b) => b.rating - a.rating);
-    hBook.value = {
-        name: topBook[0].title,
-        author: topBook[0].author,
-        rating: topBook[0].rating
-    };
-
-    await issuedBookStore.retrieveAllIssuedBooks();
-    tIssuedBooks.value = issuedBookStore.allIssuedBooks;
-    rIssuedBooks.value = issuedBookStore.allIssuedBooks.filter(rb => rb.status == "Revoked");
-    oIssuedBooks.value = issuedBookStore.allIssuedBooks.filter(ob => ob.status == "Ongoing");
-
-    console.log(popularUsers.value + " " + popularBooks.value + " " + popularSections.value)
-})
 
 const searchState = reactive({
     search: ref(null)
@@ -285,7 +131,7 @@ const onSearchSubmit = (async () => {
     await searchStore.getAllSearchedUsers(searchState.search.toLowerCase());
     searchedUserResults.value = searchStore.searchedUser.filter(u => u.flagged == false);
     searchedUserFlaggedResults.value = searchStore.searchedUser.filter(u => u.flagged == true);
-    if (searchedUserResults.value.length == 0 && searchedUserFlaggedResults.value.length ==0) {
+    if (searchedUserResults.value.length == 0 && searchedUserFlaggedResults.value.length == 0) {
         let message = "No search results for: " + searchState.search
         alertStore.error(message);
     }
@@ -295,15 +141,15 @@ const clearSearch = (() => {
     searchedUserResults.value = [];
 })
 
-const flagCurrentUser = (async(id, status)=>{
+const flagCurrentUser = (async (id, status) => {
     try {
-        await userStore.flagUser(id,status);
+        await userStore.flagUser(id, status);
         setTimeout(() => {
             let message = "User "
-            if(status == true){
+            if (status == true) {
                 message = message + "flagged successfully"
             }
-            else{
+            else {
                 message = message + "unflagged successfully"
             }
             alertStore.success(message);
@@ -316,12 +162,343 @@ const flagCurrentUser = (async(id, status)=>{
     }
 })
 
+const chartFrame = ref(null);
+const selectedGraph = ref('users');
+
+const viewCurrentGraph = async (type) => {
+    if(type == "users"){
+        selectedGraph.value = type;
+    }
+    else if(type == "sections"){
+        await getPopularSection();
+        selectedGraph.value = type;
+    }
+    else if(type == "books"){
+        await getTopBooksData();
+        selectedGraph.value = type;
+    }
+    else if(type == "issued books"){
+        await getIssuedBooksStats();
+        selectedGraph.value = type;
+    }
+}
+
+watch(selectedGraph, (newType) => {
+    loadChart(newType);
+})
+
+const aUsers = ref(0);
+const bUsers = ref(0);
+const rIssuedBooks = ref(0);
+const oIssuedBooks = ref(0);
+const rEIssuedBooks = ref(0);
+const topBooks = ref([]);
+const bookNames = [];
+const bookRating = [];
+const sectionNames = [];
+const sectionValues = [];
+
+const userChartData = {
+    labels: ['Active', 'Flagged'],
+    datasets: [{
+        label: 'User Count: ',
+        data: [aUsers, bUsers],
+        backgroundColor: [
+            'rgb(0, 255, 111)',
+            'rgb(255, 46, 46)',
+        ],
+        hoverOffset: 4
+    }]
+};
+
+const userChartConfig = {
+    type: 'doughnut',
+    data: userChartData,
+    options: {
+        radius: '100%',
+        responsive: false,
+        plugins: {
+            legend: {
+                position: 'left', // Move the legend to the left side
+                labels: {
+                    boxWidth: 20,
+                    padding: 30,
+                    font: {
+                        size: 18,     // Increases font size of the legend
+                    }
+                }
+            },
+        }
+    }
+};
+
+const bookChartData = {
+    labels: bookNames,
+    datasets: [{
+        label: 'Rating: ',
+        data: bookRating,
+        backgroundColor: [
+            'rgba(255, 99, 132)',
+            'rgba(255, 159, 64)',
+            'rgba(255, 205, 86)',
+            'rgba(75, 192, 192)',
+            'rgba(54, 162, 235)',
+            'rgba(153, 102, 255)',
+            'rgba(201, 203, 207)',
+            'rgba(255, 99, 132)',
+            'rgba(255, 159, 64)',
+            'rgba(255, 205, 86)',
+        ],
+        borderColor: [
+            'rgb(255, 99, 132)',
+            'rgb(255, 159, 64)',
+            'rgb(255, 205, 86)',
+            'rgb(75, 192, 192)',
+            'rgb(54, 162, 235)',
+            'rgb(153, 102, 255)',
+            'rgb(201, 203, 207)',
+            'rgb(255, 99, 132)',
+            'rgb(255, 159, 64)',
+            'rgb(255, 205, 86)',
+        ],
+        borderWidth: 1
+    }]
+};
+
+const bookChartConfig = {
+    type: 'bar',
+    data: bookChartData,
+    options: {
+        responsive: false,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 10,           
+                ticks: {
+                    stepSize: 1,
+                    color: 'white'
+                },
+                title: { 
+                    display: true,
+                    text: 'Rating', 
+                    color: 'white', 
+                    font: {
+                        size: 18,
+                    }
+                }
+            },
+            x: {
+                ticks:{
+                    color: 'white'
+                },
+                title: { 
+                    display: true,
+                    text: 'Books', 
+                    color: 'white', 
+                    font: {
+                        size: 18,
+                    }
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false,
+            }
+        },
+    }
+};
+
+const sectionChartData = {
+    labels: sectionNames,
+    datasets: [{
+        label: 'Number of Books: ',
+        data: sectionValues,
+        backgroundColor: [
+            'rgba(255, 99, 132)',
+            'rgba(255, 159, 64)',
+            'rgba(255, 205, 86)',
+            'rgba(75, 192, 192)',
+            'rgba(54, 162, 235)',
+            'rgba(153, 102, 255)',
+            'rgba(201, 203, 207)',
+            'rgba(255, 99, 132)',
+            'rgba(255, 159, 64)',
+            'rgba(255, 205, 86)',
+        ],
+        borderColor: [
+            'rgb(255, 99, 132)',
+            'rgb(255, 159, 64)',
+            'rgb(255, 205, 86)',
+            'rgb(75, 192, 192)',
+            'rgb(54, 162, 235)',
+            'rgb(153, 102, 255)',
+            'rgb(201, 203, 207)',
+            'rgb(255, 99, 132)',
+            'rgb(255, 159, 64)',
+            'rgb(255, 205, 86)',
+        ],
+        borderWidth: 1
+    }]
+};
+
+const sectionChartConfig = {
+    type: 'bar',
+    data: sectionChartData,
+    options: {
+        responsive: false,
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        scales: {
+            y: {           
+                ticks: {
+                    color: 'white',
+                },
+                title: { 
+                    display: true,
+                    text: 'Sections', 
+                    color: 'white', 
+                    font: {
+                        size: 18,
+                    }
+                }
+            },
+            x: {
+                ticks:{
+                    color: 'white',
+                    stepSize: 1,
+                },
+                title: { 
+                    display: true,
+                    text: 'Number of Books', 
+                    color: 'white', 
+                    font: {
+                        size: 18,
+                    }
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false,
+            }
+        },
+    }
+};
+
+const issuedBookChartData = {
+    labels: ['Revoked', 'Ongoing','Requested'],
+    datasets: [{
+        label: 'Book Count: ',
+        data: [rIssuedBooks, oIssuedBooks, rEIssuedBooks],
+        backgroundColor: [
+            'rgb(255, 46, 46)',
+            'rgb(0, 255, 111)',
+            'rgb(255, 255, 46)',
+        ],
+        hoverOffset: 4
+    }]
+};
+
+const issuedBookChartConfig = {
+    type: 'pie',
+    data: issuedBookChartData,
+    options: {
+        radius: '100%',
+        responsive: false,
+        plugins: {
+            legend: {
+                position: 'left', // Move the legend to the left side
+                labels: {
+                    boxWidth: 20,
+                    padding: 30,
+                    font: {
+                        size: 18,     // Increases font size of the legend
+                    }
+                }
+            },
+        }
+    }
+};
+
+const loadChart = (type) => {
+    const ctx = chartFrame.value.contentWindow.document.createElement('canvas');
+    chartFrame.value.contentWindow.document.body.innerHTML = '';
+    chartFrame.value.contentWindow.document.body.appendChild(ctx);
+    ctx.width = 550;
+    ctx.height = 550;
+    ctx.style.margin = 'auto';
+    if (type === 'users') {
+        new Chart(ctx, userChartConfig);
+    }
+    else if (type === 'books') {
+        new Chart(ctx, bookChartConfig);
+    }
+    else if (type === 'sections') {
+        new Chart(ctx, sectionChartConfig);
+    }
+    else if (type === 'issued books'){
+        new Chart(ctx, issuedBookChartConfig);
+    }
+};
+
+onMounted(async () => {
+    await userStore.retrieveAllUsers();
+    aUsers.value = userStore.allUsers.filter(u => u.flagged == false).length;
+    bUsers.value = userStore.allUsers.filter(u => u.flagged == true).length;
+    loadChart(selectedGraph.value);
+});
+
+const getTopBooksData = (async () => {
+    await eBookStore.retrieveAllEBooks();
+    bookNames.length = 0;
+    bookRating.length = 0;
+    topBooks.value = eBookStore.allEBooks.sort((a, b) => b.rating - a.rating).slice(0, 10).sort(() => Math.random() - 0.5);
+    for(let b in topBooks.value){
+        bookNames.push(topBooks.value[b].title);
+        bookRating.push(topBooks.value[b].rating);
+    }
+})
+
+const getPopularSection = (async () => {
+    await eBookStore.retrieveAllEBooks();
+    sectionNames.length = 0;
+    sectionValues.length = 0;
+    const sectionMap = new Map();
+    eBookStore.allEBooks.forEach(book => {
+        let sectionList = book.section.split(',');
+        for (let s in sectionList) {
+            if (sectionMap.has(sectionList[s])) {
+                sectionMap.set(sectionList[s], sectionMap.get(sectionList[s]) + 1);
+            }
+            else {
+                sectionMap.set(sectionList[s], 1);
+            }
+        }
+    });
+    let top10Sections = Array.from(sectionMap).sort((a, b) => b[1] - a[1]).slice(0, 10).sort(() => Math.random() - 0.5);
+    for(let x in top10Sections){
+        sectionNames.push(top10Sections[x][0]);
+        sectionValues.push(top10Sections[x][1]);
+    }
+})
+
+const getIssuedBooksStats = (async () => {
+    await issuedBookStore.retrieveAllIssuedBooks();
+    rIssuedBooks.value = issuedBookStore.allIssuedBooks.filter(rb => rb.status === "Revoked").length;
+    oIssuedBooks.value = issuedBookStore.allIssuedBooks.filter(ob => ob.status === "Ongoing").length;
+    rEIssuedBooks.value = issuedBookStore.allIssuedBooks.filter(reb => reb.status === "Requested").length;
+    console.log();
+})
+
 </script>
 
 <style scoped>
 .myCont {
     min-height: 50dvh;
 }
+
 table {
     width: 100%;
     border: 2px solid #000;
@@ -340,5 +517,10 @@ td {
 th {
     background-color: #212529;
     color: white;
+}
+
+.myIFrame {
+    border: 4px solid #6c757d;
+    border-radius: 20px;
 }
 </style>

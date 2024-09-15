@@ -165,8 +165,8 @@
                                 <span class="visually-hidden">Loading...</span>
                             </div>
                         </div>
-                        <div class="row" v-else>
-                            <div v-if="topSections.length > 0">
+                        <div v-else>
+                            <div class="row" v-if="topSections.length > 0">
                                 <div class="col-md-4 col-lg-3 col-sm-5" v-for="section in topSections" :key="section.id">
                                     <div class="card bg-info bg-gradient mt-2 mySectionCard">
                                         <div class="card-header">
@@ -201,8 +201,8 @@
                                 <span class="visually-hidden">Loading...</span>
                             </div>
                         </div>
-                        <div class="row" v-else>
-                            <div v-if="topEbooks.length > 0">
+                        <div v-else>
+                            <div class="row" v-if="topEbooks.length > 0">
                                 <div class="col-md-4 col-lg-3 col-sm-5" v-for="book in topEbooks" :key="book.id">
                                     <div class="card bg-light bg-gradient mt-2 myCard">
                                         <div class="card-header">
