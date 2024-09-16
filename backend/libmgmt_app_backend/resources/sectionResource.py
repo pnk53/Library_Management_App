@@ -1,7 +1,7 @@
 from flask import abort
 from flask_restful import Resource, marshal_with, reqparse, fields
 from sqlalchemy.exc import IntegrityError
-from libmgmt_app_backend.extensions import db
+from libmgmt_app_backend.extensions import db, cache
 from libmgmt_app_backend.main.routes import jwt_token_required
 from libmgmt_app_backend.models.section import Section
 
@@ -39,6 +39,7 @@ def section_not_found(section_id):
 
 class SectionResource(Resource):
     @jwt_token_required
+    @cache.cached(timeout=50)
     @marshal_with(section_fields)
     def get(self,section_id=None):
         if section_id:
@@ -62,6 +63,7 @@ class SectionResource(Resource):
                 if data[d] is not None:
                     setattr(currentSection, d, data[d])
             db.session.commit()
+            cache.clear()
             return currentSection, 200
     
     @jwt_token_required
@@ -72,6 +74,7 @@ class SectionResource(Resource):
         try:
             db.session.add(newSection)
             db.session.commit()
+            cache.clear()
         except IntegrityError as e:
             db.session.rollback()
             abort(409,{
@@ -90,6 +93,7 @@ class SectionResource(Resource):
             try:
                 db.session.delete(currentSection)
                 db.session.commit()
+                cache.clear()
             except Exception as e:
                 abort(500,{
                     "message": "Something went wrong",

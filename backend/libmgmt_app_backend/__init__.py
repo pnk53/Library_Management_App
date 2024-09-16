@@ -1,4 +1,5 @@
-from flask import Flask
+from datetime import datetime
+from flask import Flask, jsonify
 from flask_cors import CORS
 from config import LocalConfig
 
@@ -8,13 +9,22 @@ def create_flask_app(configuration=LocalConfig):
     flask_app.app_context().push()
     
     #Initialize Flask extensions here
-    from libmgmt_app_backend.extensions import db, api
+    from libmgmt_app_backend.extensions import db, api, cache
     db.__init__(flask_app)
     
     CORS(
         flask_app,
         origins="http://localhost:8081",
     )
+    cache.init_app(
+        flask_app,
+        config={
+            "CACHE_TYPE": "redis",
+            "CACHE_REDIS_URL": "redis://localhost:6379/1",
+            "prefix": "cache_",
+        },
+    )
+    
     
     #Register blueprints here
     from libmgmt_app_backend.main import bpMain
@@ -38,7 +48,9 @@ def create_flask_app(configuration=LocalConfig):
         return '<h1>This is the testing page for "/test/" url</h1> <h2>This is successful !!!!</h2>'
     
     @flask_app.route('/api/healthcheck')
+    @cache.cached(timeout=10)
     def healthcheck():
-        return {"status" : "ok"}
+        return jsonify({"status" : "ok",
+                "datetime" : datetime.now()})
     
     return flask_app

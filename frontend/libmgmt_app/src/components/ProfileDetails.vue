@@ -104,6 +104,7 @@ const vUpdateUser = useVuelidate(updateUserRules, updateUserState, {
 const onUpdateUser = (async () => {
     try{
         await userStore.userUpdate(localStorage.getItem('user_id'), updateUserState);
+        isDisabled.value = !isDisabled.value;
         setTimeout(() => {
             alertStore.success("User details updated successfully");
         }, 200);

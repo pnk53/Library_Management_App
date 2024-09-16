@@ -362,6 +362,7 @@ const onEBookRate = (async() => {
         ebookState.rating = finalOverallRating;
         await eBookStore.updateEBook(route.params.eBookId, ebookState, totalRater);
         isDisabled.value = true;
+        await loadSelectedBook();
         setTimeout(() => {
             alertStore.success("E-Book rated successfully")
         }, 200)

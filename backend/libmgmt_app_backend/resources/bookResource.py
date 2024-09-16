@@ -3,7 +3,7 @@ from flask import abort, request
 from flask_restful import Resource, marshal_with, reqparse, fields
 from werkzeug.utils import secure_filename
 from sqlalchemy.exc import IntegrityError
-from libmgmt_app_backend.extensions import db
+from libmgmt_app_backend.extensions import db, cache
 from libmgmt_app_backend.main.routes import jwt_token_required
 from libmgmt_app_backend.models.book import Book
 from config import LocalConfig
@@ -69,6 +69,7 @@ def book_not_found(book_id):
 
 class BookResource(Resource):
     @jwt_token_required
+    @cache.cached(timeout=50)
     @marshal_with(book_fields)
     def get(self,book_id=None):
         if book_id:
@@ -92,6 +93,7 @@ class BookResource(Resource):
                 if data[d] is not None:
                     setattr(currentBook, d, data[d])
             db.session.commit()
+            cache.clear()
             return currentBook, 200
     
     @jwt_token_required
@@ -119,6 +121,7 @@ class BookResource(Resource):
         try:
             db.session.add(newBook)
             db.session.commit()
+            cache.clear()
         except IntegrityError as e:
             db.session.rollback()
             abort(409,{
@@ -134,9 +137,26 @@ class BookResource(Resource):
         if book_id:
             book_not_found(book_id)
             currentBook = Book.query.get(book_id)
+            filename= currentBook.contentPath.split('/')[-1]
+            path=(os.path.join(LocalConfig.UPLOAD_FOLDER, "static", filename))
+            if os.path.exists(path):
+                try:
+                    os.remove(path)
+                except Exception as e:
+                    abort(500,{
+                    "message": "An error occurred while deleting the book",
+                    "data": None,
+                    "error": str(e),
+                })
+            else:
+                abort(500,{
+                    "message": "File deletion failed. Requested file does not exists",
+                    "data": None,
+                })
             try:
                 db.session.delete(currentBook)
                 db.session.commit()
+                cache.clear()
             except Exception as e:
                 abort(500,{
                     "message": "Something went wrong",

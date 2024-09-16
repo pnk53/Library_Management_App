@@ -11,7 +11,7 @@ class IssuedBook(db.Model, UserMixin):
     returnedDate = Column(String(50))
     bookName = Column(String(100), nullable=False)
     issuerName = Column(String(50), nullable=False)
-    bookId = Column(Integer, db.ForeignKey('book.id'), nullable=False)
+    bookId = Column(Integer, db.ForeignKey('book.id'))
     userId = Column(Integer, db.ForeignKey('user.id'), nullable=False)
     
     def __init__(self, status, bookId, userId, issuedDate, returnedDate, bookName, issuerName):
