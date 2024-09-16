@@ -32,6 +32,9 @@ import { onClickOutside } from '@vueuse/core';
 import { computed, reactive, ref } from 'vue';
 import { required, email } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
+import { useAlertStore } from '@/stores/alertStore';
+
+const alertStore = useAlertStore();
 
 const isModalOpen = ref(true)
 const modal = ref(null)
@@ -53,7 +56,8 @@ const vForgot = useVuelidate(forgotRules, forgotState, {
 
 
 const forgot = () => {
-    alert(forgotState.email);
+    let message = "Password reset mail has been successfully sent to " + forgotState.email + "Please check your registered mail for further process."
+    alertStore.warning(message);
 }
 
 </script>

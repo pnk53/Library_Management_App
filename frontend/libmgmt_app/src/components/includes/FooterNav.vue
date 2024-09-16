@@ -11,11 +11,14 @@
             <div class="col-md-3 offset-md-1 col-lg-3 offset-lg-1 col-sm-3 offset-sm-1">
                 <h4 class="text-center fs-3 fw-bold text-black">Important Links</h4>
                 <ul class="list-unstyled text-center myFooterList mt-4">
-                    <li class="nav-item">
-                        <router-link class="nav-link" to="#"  v-if="isLogged" >Home</router-link>
+                    <li class="nav-item" v-if="isLogged">
+                        <router-link class="nav-link text-black" :to="userHome" active-class="active" exact-active-class="extract-active">Home</router-link>
                     </li>
-                    <li class="nav-item">
-                        <router-link class="nav-link" to="#"  v-if="isLogged" >Explore</router-link>
+                    <li class="nav-item" v-if="isLogged">
+                        <router-link class="nav-link text-black" to="/explorer" active-class="active" exact-active-class="extract-active">Explorer</router-link>
+                    </li>
+                    <li class="nav-item" v-if="isLogged && isAdmin">
+                        <router-link class="nav-link text-black" to="/stats" active-class="active" exact-active-class="extract-active">Stats</router-link>
                     </li>
                     <li class="nav-item">
                         <router-link class="nav-link" to="/AboutUs" >About Us</router-link>
@@ -43,20 +46,35 @@
 </footer>
 </template>
 
-<script>
-    export default {
-    name: 'FooterNav',  
-    computed: {
-        isLogged(){
-            if(this.$route.path == '/' || this.$route.path == '/signUp' || this.$route.path == '/ContactUs' || this.$route.path == '/AboutUs'){
-                return false;
-            }
-            else{
-                return true;
-            }
-        }
+<script setup>
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+const isLogged = computed(() => {
+    if ((route.path == '/' || route.path == '/signUp' || route.path == '/ContactUs' || route.path == '/AboutUs') && !localStorage.getItem('name')) {
+        return false;
     }
+    else {
+        return true;
     }
+})
+const isAdmin = computed(() => {
+    if (localStorage.getItem('userType') == 'Librarian'){
+        return true;
+    }
+    else{
+        return false;
+    }
+})
+const userHome = computed(() => {
+    if(localStorage.getItem('userType') == 'Librarian'){
+        return "/librarianHome";
+    }
+    else{
+        return "/userHome";
+    }
+})
 </script>
 
 <style scoped>

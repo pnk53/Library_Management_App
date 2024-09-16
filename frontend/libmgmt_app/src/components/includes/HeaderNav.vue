@@ -110,6 +110,7 @@ const logout = (() => {
     router.push('/');
     setTimeout(()=>{
     alertStore.success("Logged out successfully");
+    location.reload();
     },300);
 })
 
