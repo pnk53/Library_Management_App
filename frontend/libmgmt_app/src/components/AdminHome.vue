@@ -121,6 +121,7 @@
                     <h5>Add new E-book <button class="btn btn-dark" @click="loadEBookComponent">Upload E-book</button>
                         <component :is="ebookModal" v-if="isEBookModalLoaded" @close="unloadEBookComponent"></component>
                     </h5>
+                    <h5>Create CSV Report <button class="btn btn-dark" @click="exportCSV">Export CSV</button></h5>
                 </div>
                 <div v-if="searchedSectionResults.length > 0 || searchedEBookResults.length > 0">
                     <h3 class="mt-5">Your search results: </h3>
@@ -283,6 +284,19 @@ async function unloadEBookComponent() {
     isEBookModalLoaded.value = false;
     ebookModal.value = null;
     await getAllEbooks();
+}
+
+async function exportCSV(){
+    try{
+        await eBookStore.exportCSVReport();
+        let message = eBookStore.csvMessage
+        setTimeout(() => {
+            alertStore.success(message)
+        }, 200)
+    }
+    catch(error){
+        console.log(error)
+    }
 }
 
 onMounted(async () => {

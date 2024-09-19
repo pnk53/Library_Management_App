@@ -16,6 +16,14 @@
         </div>
         <form @submit.prevent="onUpdateUser" class="form" ref="updateForm">
             <div class="mb-3">
+                <label for="username" class="form-label text-warning">Username</label>
+                <input type="text" id="username" class="form-control" name="username" placeholder="alexM12"
+                    v-model="updateUserState.username" disabled="True" :class="{ 'is-invalid': vUpdateUser.username.$error }">
+                <div class="invalid-feedback" v-if="vUpdateUser.username.$error">
+                    {{ vUpdateUser.username.$errors[0].$message }}
+                </div>
+            </div>
+            <div class="mb-3">
                 <label for="firstName" class="form-label text-warning">First Name</label>
                 <input type="text" id="firstName" class="form-control" name="firstname" placeholder="Alex"
                     v-model="updateUserState.firstName" :disabled="isDisabled" :class="{ 'is-invalid': vUpdateUser.firstName.$error }">
@@ -29,14 +37,6 @@
                     v-model="updateUserState.lastName" :disabled="isDisabled" :class="{ 'is-invalid': vUpdateUser.lastName.$error }">
                 <div class="invalid-feedback" v-if="vUpdateUser.lastName.$error">
                     {{ vUpdateUser.lastName.$errors[0].$message }}
-                </div>
-            </div>
-            <div class="mb-3">
-                <label for="username" class="form-label text-warning">Username</label>
-                <input type="text" id="username" class="form-control" name="username" placeholder="alexM12"
-                    v-model="updateUserState.username" :disabled="isDisabled" :class="{ 'is-invalid': vUpdateUser.username.$error }">
-                <div class="invalid-feedback" v-if="vUpdateUser.username.$error">
-                    {{ vUpdateUser.username.$errors[0].$message }}
                 </div>
             </div>
             <div class="mb-3">

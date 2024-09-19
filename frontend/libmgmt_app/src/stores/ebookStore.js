@@ -7,6 +7,7 @@ export const useEBookStore = defineStore('eBook', () => {
     const eBook = ref(null);
     const allEBooks = ref([]);
     const selectedEbook = ref({});
+    const csvMessage = ref(null)
 
     async function addEBook(eBookData) {
 
@@ -58,6 +59,17 @@ export const useEBookStore = defineStore('eBook', () => {
                 }
             })
             selectedEbook.value = response.data;
+        }
+        catch (error) {
+            errorMessage.value = error.response ? error.response.data.message.message : error.message;
+            throw Error(error);
+        }
+    }
+
+    async function exportCSVReport(){
+        try{
+            let res = await axios.get(`http://localhost:5000/download-csv`)
+            csvMessage.value = res.data.message
         }
         catch (error) {
             errorMessage.value = error.response ? error.response.data.message.message : error.message;
@@ -161,9 +173,11 @@ export const useEBookStore = defineStore('eBook', () => {
         eBook,
         allEBooks,
         selectedEbook,
+        csvMessage,
         addEBook,
         retrieveAllEBooks,
         currentEBook,
+        exportCSVReport,
         updateEBook,
         deleteEBook,
         updateAssignedBookInfo,

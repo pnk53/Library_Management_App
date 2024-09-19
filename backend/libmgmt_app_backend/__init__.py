@@ -1,15 +1,19 @@
 from datetime import datetime
-from flask import Flask, jsonify
+import os
+from flask import Flask, jsonify, send_file, send_from_directory
 from flask_cors import CORS
 from config import LocalConfig
 
+flask_app = None
+
 def create_flask_app(configuration=LocalConfig):
+    global flask_app
     flask_app = Flask(__name__)
     flask_app.config.from_object(configuration)
     flask_app.app_context().push()
     
     #Initialize Flask extensions here
-    from libmgmt_app_backend.extensions import db, api, cache
+    from libmgmt_app_backend.extensions import db, api, cache, celery_app
     db.__init__(flask_app)
     
     CORS(
@@ -25,6 +29,7 @@ def create_flask_app(configuration=LocalConfig):
         },
     )
     
+    celery_app.conf.update(flask_app.config)
     
     #Register blueprints here
     from libmgmt_app_backend.main import bpMain
@@ -53,4 +58,16 @@ def create_flask_app(configuration=LocalConfig):
         return jsonify({"status" : "ok",
                 "datetime" : datetime.now()})
     
+    @flask_app.route('/celeryDemo')
+    def celeryDemo():
+        from tasks import add
+        result = add.delay(10,20)
+        return jsonify({"task_id": result.id})
+    
+    @flask_app.route('/download-csv')
+    def downloadCSV():
+        from tasks import export_csv_task
+        result = export_csv_task.delay()
+        return jsonify({"task_id": result.id, "message": "CSV exported successfully"})
+        
     return flask_app

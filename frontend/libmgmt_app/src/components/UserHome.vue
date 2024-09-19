@@ -105,6 +105,7 @@ function viewEBook(id) {
 
 <style scoped>
 .myReqCont{
+    min-height: 80dvh;
     max-height: 80dvh;
     overflow-y: auto;
 }
