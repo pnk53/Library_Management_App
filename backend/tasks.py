@@ -15,23 +15,27 @@ def initialize_flask_app(**kwargs):
     global flask_app
     flask_app = create_flask_app()
 
+# A Simple adding celery task for testing celery working
 @celery_app.task
 def add(x,y):
     return x+y
 
+# Reccuring daily_notification_task which runs every 2 mins
 # @celery_app.on_after_finalize.connect
 # def setup_periodic_hello_tasks(sender,**kwargs):
 #     sender.add_periodic_task(crontab(minute='*/2'),daily_notification_task.s(),name="run every 2 minute")
 
+# Reccuring daily_notification_task which runs everyday at 1700 hours
 @celery_app.on_after_finalize.connect
 def setup_periodic_hello_tasks(sender,**kwargs):
     sender.add_periodic_task(crontab(minute=0, hour=17),daily_notification_task.s(),name="Runs everyday at 1700 hours")
 
+# Perodic monthly_report_task which runs 1st day of every month
 @celery_app.on_after_finalize.connect
 def setup_periodic_monthly_tasks(sender,**kwargs):
     sender.add_periodic_task(crontab(minute=0, hour=0, day_of_month=1),monthly_report_task.s(),name="Runs 1st of every month")
 
-#Download CSV report task
+#Export CSV report task
 @celery_app.task
 def export_csv_task():
     data = retrieveDataforCSV()
@@ -82,6 +86,7 @@ def daily_notification_task():
             
     return "Email successfully sent to inactive users"
 
+# Retrieving data from IssuedBook and Book database
 def retrieveDataforCSV():
     global flask_app
     with flask_app.app_context():
@@ -122,6 +127,7 @@ def retrieveDataforCSV():
         
         return formatted_data
 
+# Generating html content body from extracted data for monthly report
 def generate_html(data):
     html = "<h2>Monthly Report - EBooks</h2><table border='1'><tr><th>Book Id</th><th>Book Name</th><th>Author</th><th>Release Date</th><th>Section</th><th>Issuer Name</th><th>Status</th><th>Issued Date</th><th>Returned Date</th><th>Rating</th></tr>"
     
@@ -141,6 +147,7 @@ def generate_html(data):
     html += "</table>"
     return html
 
+# Mailing structure: make sure to add your password before running
 def send_mail_task(content, subject_line, receiver_mail):
     # Email configuration
     sender = '23dp1000016@ds.study.iitm.ac.in'
