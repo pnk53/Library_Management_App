@@ -19,13 +19,13 @@ def initialize_flask_app(**kwargs):
 def add(x,y):
     return x+y
 
-@celery_app.on_after_finalize.connect
-def setup_periodic_hello_tasks(sender,**kwargs):
-    sender.add_periodic_task(crontab(minute='*/2'),daily_notification_task.s(),name="run every 2 minute")
-
 # @celery_app.on_after_finalize.connect
 # def setup_periodic_hello_tasks(sender,**kwargs):
-#     sender.add_periodic_task(crontab(minute=0, hour=17),daily_notification_task.s(),name="Runs everyday at 1700 hours")
+#     sender.add_periodic_task(crontab(minute='*/2'),daily_notification_task.s(),name="run every 2 minute")
+
+@celery_app.on_after_finalize.connect
+def setup_periodic_hello_tasks(sender,**kwargs):
+    sender.add_periodic_task(crontab(minute=0, hour=17),daily_notification_task.s(),name="Runs everyday at 1700 hours")
 
 @celery_app.on_after_finalize.connect
 def setup_periodic_monthly_tasks(sender,**kwargs):
@@ -158,7 +158,7 @@ def send_mail_task(content, subject_line, receiver_mail):
     try:
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
-        server.login('23dp1000016@ds.study.iitm.ac.in', 'ldlg mbmo ppew optx')
+        server.login('23dp1000016@ds.study.iitm.ac.in', '')
         server.sendmail(sender, receiver, msg.as_string())
         server.quit()
         print('Email sent successfully')

@@ -167,6 +167,7 @@ const selectedGraph = ref('users');
 
 const viewCurrentGraph = async (type) => {
     if(type == "users"){
+        await getUserStats();
         selectedGraph.value = type;
     }
     else if(type == "sections"){
@@ -444,11 +445,15 @@ const loadChart = (type) => {
 };
 
 onMounted(async () => {
+    await getUserStats();
+    loadChart(selectedGraph.value);
+});
+
+const getUserStats = (async()=>{
     await userStore.retrieveAllUsers();
     aUsers.value = userStore.allUsers.filter(u => u.flagged == false).length;
     bUsers.value = userStore.allUsers.filter(u => u.flagged == true).length;
-    loadChart(selectedGraph.value);
-});
+})
 
 const getTopBooksData = (async () => {
     await eBookStore.retrieveAllEBooks();
@@ -489,7 +494,6 @@ const getIssuedBooksStats = (async () => {
     rIssuedBooks.value = issuedBookStore.allIssuedBooks.filter(rb => rb.status === "Revoked").length;
     oIssuedBooks.value = issuedBookStore.allIssuedBooks.filter(ob => ob.status === "Ongoing").length;
     rEIssuedBooks.value = issuedBookStore.allIssuedBooks.filter(reb => reb.status === "Requested").length;
-    console.log();
 })
 
 </script>
